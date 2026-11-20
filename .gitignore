@@ -17,8 +17,21 @@
 /.next/
 /out/
 
+# capacitor / android
+/android/.gradle/
+/android/app/build/
+/android/build/
+/android/captures/
+/android/local.properties
+*.apk
+*.aab
+!releases/*.apk
+
 # production
 /build
+
+# local media fallback when MinIO is unavailable
+/storage/
 
 # misc
 .DS_Store
@@ -39,3 +52,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# nested project copies (not part of the app)
+/sheltergh-with-new-features/
+/sheltergh-with-new-features-enhanced/

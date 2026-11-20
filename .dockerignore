@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.git
+android
+releases
+*.apk
+*.jfif
+.env
+.env*.local
+README.md
+schema.md
+AGENTS.md
+CLAUDE.md

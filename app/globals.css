@@ -1,26 +1,206 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-space-grotesk);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-verified: var(--verified);
+  --color-verified-foreground: var(--verified-foreground);
+  --color-rating: var(--rating);
+  --color-brand: var(--brand);
+  --color-surface: var(--surface);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Apple canvas + MinIO ink. One dark CTA, hairline borders, no blue wash. */
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+  --primary: #1d1d1f;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f7;
+  --secondary-foreground: #1d1d1f;
+  --muted: #f5f5f7;
+  --muted-foreground: #6e6e73;
+  --accent: #f3eefc;
+  --accent-foreground: #5b3cc4;
+  --destructive: #ff3b30;
+  --border: rgb(0 0 0 / 0.08);
+  --input: rgb(0 0 0 / 0.1);
+  --ring: #6d4aff;
+  --brand: #1d1d1f;
+  --verified: #1f8a4c;
+  --verified-foreground: #ffffff;
+  --rating: #e8a317;
+  --surface: #ffffff;
+  --chart-1: #6d4aff;
+  --chart-2: #1f8a4c;
+  --chart-3: #e8a317;
+  --chart-4: #6e6e73;
+  --chart-5: #1d1d1f;
+  --radius: 0.875rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1d1d1f;
+  --sidebar-primary: #1d1d1f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f7;
+  --sidebar-accent-foreground: #1d1d1f;
+  --sidebar-border: rgb(0 0 0 / 0.08);
+  --sidebar-ring: #6d4aff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-color: #f5f5f7;
+    -webkit-font-smoothing: antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.03em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Solid footer/bar so listings never show through. */
+  .glass-bar {
+    background: #ffffff;
+    border-color: rgb(0 0 0 / 0.08);
+  }
+
+  .listing-card {
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .listing-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.06);
+  }
+
+  .hero-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    opacity: 0.16;
+    mix-blend-mode: overlay;
+  }
+
+  .hero-adinkra-cloth {
+    background-image: url("/brand/adinkra-cloth-pattern.jpg");
+    background-size: 540px 360px;
+    background-repeat: repeat;
+    opacity: 0.9;
+    filter: saturate(1.1) contrast(1.1) brightness(0.94);
+    transform: rotate(-1.5deg) scale(1.08);
+    transform-origin: center;
+  }
+
+  .hero-adinkra-cloth-panel {
+    background-image: url("/brand/adinkra-cloth-pattern.jpg");
+    background-size: 420px 280px;
+    background-repeat: repeat;
+    opacity: 1;
+    filter: saturate(1.14) contrast(1.12);
+  }
+
+  .hero-adinkra-veil {
+    background:
+      radial-gradient(ellipse 65% 55% at 78% 38%, rgb(227 155 74 / 0.22), transparent 58%),
+      radial-gradient(ellipse 50% 45% at 12% 70%, rgb(31 111 106 / 0.18), transparent 55%),
+      linear-gradient(108deg, rgb(18 14 12 / 0.88) 0%, rgb(18 14 12 / 0.62) 34%, rgb(18 14 12 / 0.28) 58%, rgb(18 14 12 / 0.55) 82%, rgb(18 14 12 / 0.9) 100%),
+      linear-gradient(180deg, rgb(18 14 12 / 0.28) 0%, rgb(18 14 12 / 0.42) 48%, rgb(18 14 12 / 0.94) 100%);
+  }
+
+  .hero-float {
+    animation: hero-float 7s ease-in-out infinite;
+  }
+
+  .hero-ken {
+    animation: hero-ken 22s ease-out both;
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes hero-ken {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float,
+  .hero-ken {
+    animation: none;
+  }
 }

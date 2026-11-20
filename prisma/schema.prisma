@@ -1,0 +1,554 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  renter
+  landlord
+  admin
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+enum PropertyType {
+  apartment
+  house
+  chamber_and_hall
+  single_room
+  short_stay
+}
+
+enum PaymentFrequency {
+  monthly
+  six_months
+  one_year
+  two_years
+}
+
+enum ListingAvailability {
+  available
+  paused
+  held
+  rented
+}
+
+enum Furnishing {
+  unfurnished
+  semi_furnished
+  furnished
+}
+
+enum BillPayer {
+  tenant
+  landlord
+  shared
+}
+
+enum LedgerStatus {
+  expected
+  received
+  late
+}
+
+enum OwnershipReviewStatus {
+  none
+  pending
+  verified
+  rejected
+}
+
+enum RentalRequestKind {
+  tour
+  application
+}
+
+enum RentalRequestStatus {
+  requested
+  accepted
+  declined
+  cancelled
+  completed
+}
+
+enum AdvanceReceiptStatus {
+  not_recorded
+  landlord_confirmed
+}
+
+enum RoomCategory {
+  living_room
+  bedroom
+  kitchen
+  bathroom
+  balcony
+  exterior
+  street_view
+}
+
+model User {
+  id                   String             @id @default(uuid()) @db.Uuid
+  email                String             @unique @db.VarChar(255)
+  phoneNumber          String             @unique @map("phone_number") @db.VarChar(20)
+  fullName             String             @map("full_name") @db.VarChar(100)
+  passwordHash         String             @map("password_hash")
+  role                 UserRole           @default(renter)
+  ghanaCardNumber      String?            @unique @map("ghana_card_number") @db.VarChar(20)
+  idVerificationStatus VerificationStatus @default(unverified) @map("id_verification_status")
+  avatarUrl            String?            @map("avatar_url")
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  properties     Property[]
+  reviews        Review[]
+  favorites      Favorite[]
+  renterThreads  ChatThread[]     @relation("RenterThreads")
+  landlordThreads ChatThread[]    @relation("LandlordThreads")
+  sentMessages   ChatMessage[]
+  listingReports ListingReport[]
+  neighborhoodInsights NeighborhoodInsight[]
+  verificationSessions VerificationSession[]
+  verificationRequests IdentityVerificationRequest[]
+  reviewsWritten UserReview[] @relation("ReviewsWritten")
+  reviewsReceived UserReview[] @relation("ReviewsReceived")
+  rentalRequestsAsRenter RentalRequest[] @relation("RenterRequests")
+  rentalRequestsAsLandlord RentalRequest[] @relation("LandlordRequests")
+
+  @@map("users")
+}
+
+enum VerificationOverallResult {
+  PASSED
+  FLAGGED_FOR_REVIEW
+  REJECTED
+}
+
+/// Ghana Card KYC attempt (MRZ + NFC + biometrics payload from client).
+model VerificationSession {
+  id                String                     @id @default(uuid()) @db.Uuid
+  userId            String                     @map("user_id") @db.Uuid
+  sessionId         String                     @unique @map("session_id") @db.Uuid
+  overallResult     VerificationOverallResult  @map("overall_result")
+  checks            Json
+  mrzDocumentNumber String?                    @map("mrz_document_number") @db.VarChar(20)
+  nationalIdNumber  String?                    @map("national_id_number") @db.VarChar(20)
+  faceMatchScore    Float?                     @map("face_match_score")
+  livenessPassed    Boolean?                   @map("liveness_passed")
+  /// Sanitized payload (large base64 fields stripped).
+  payload           Json
+  createdAt         DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("verification_sessions")
+}
+
+model Property {
+  id                     String           @id @default(uuid()) @db.Uuid
+  landlordId             String           @map("landlord_id") @db.Uuid
+  title                  String           @db.VarChar(150)
+  description            String
+  propertyType           PropertyType     @map("property_type")
+  pricePerMonth          Decimal          @map("price_per_month") @db.Decimal(10, 2)
+  advancePeriod          PaymentFrequency @map("advance_period")
+  securityDeposit        Decimal          @default(0) @map("security_deposit") @db.Decimal(10, 2)
+  region                 String           @db.VarChar(50)
+  cityTown               String           @map("city_town") @db.VarChar(50)
+  neighborhood           String           @db.VarChar(50)
+  digitalAddressGhanapost String?         @map("digital_address_ghanapost") @db.VarChar(15)
+  latitude               Decimal?         @db.Decimal(10, 7)
+  longitude              Decimal?         @db.Decimal(10, 7)
+  locationVerified       Boolean          @default(false) @map("location_verified")
+  locationAccuracyMeters Float?           @map("location_accuracy_meters")
+  gpsCapturedAt          DateTime?        @map("gps_captured_at") @db.Timestamptz(6)
+  bedrooms               Int
+  bathrooms              Int
+  squareFootage          Int?             @map("square_footage")
+  isDirectOwnerVerified  Boolean          @default(false) @map("is_direct_owner_verified")
+  landTitleDocumentUrl   String?          @map("land_title_document_url")
+  ownershipStatus        OwnershipReviewStatus @default(none) @map("ownership_status")
+  availability           ListingAvailability @default(available)
+  furnishing             Furnishing       @default(unfurnished)
+  availableFrom          DateTime?        @map("available_from") @db.Date
+  billsElectricity       BillPayer        @default(tenant) @map("bills_electricity")
+  billsWater             BillPayer        @default(tenant) @map("bills_water")
+  billsInternet          BillPayer        @default(tenant) @map("bills_internet")
+  petsAllowed            Boolean          @default(false) @map("pets_allowed")
+  smokingAllowed         Boolean          @default(false) @map("smoking_allowed")
+  maxOccupants           Int?             @map("max_occupants")
+  quietHours             String?          @map("quiet_hours") @db.VarChar(80)
+  houseRules             String?          @map("house_rules")
+  accessInstructions     String?          @map("access_instructions")
+  isActive               Boolean          @default(true) @map("is_active")
+  createdAt              DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  landlord  User               @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  amenities PropertyAmenities?
+  media     PropertyMedia[]
+  reviews   Review[]
+  favorites Favorite[]
+  chatThreads ChatThread[]
+  reports   ListingReport[]
+  rentalRequests RentalRequest[]
+  priceChanges PriceChange[]
+
+  @@index([landlordId])
+  @@index([neighborhood])
+  @@index([propertyType])
+  @@map("properties")
+}
+
+model PropertyAmenities {
+  propertyId            String  @id @map("property_id") @db.Uuid
+  hasPolytankWater      Boolean @default(false) @map("has_polytank_water")
+  hasStandbyGenerator   Boolean @default(false) @map("has_standby_generator")
+  hasAirConditioning    Boolean @default(false) @map("has_air_conditioning")
+  isWalledAndGated      Boolean @default(false) @map("is_walled_and_gated")
+  hasSelfMeter          Boolean @default(true) @map("has_self_meter")
+  hasParkingSpace       Boolean @default(false) @map("has_parking_space")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_amenities")
+}
+
+model PropertyMedia {
+  id           String       @id @default(uuid()) @db.Uuid
+  propertyId   String       @map("property_id") @db.Uuid
+  mediaUrl     String       @map("media_url")
+  mediaType    String       @map("media_type") @db.VarChar(10)
+  category     RoomCategory
+  displayOrder Int          @default(0) @map("display_order")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_media")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  propertyId String   @map("property_id") @db.Uuid
+  reviewerId String   @map("reviewer_id") @db.Uuid
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reviewer User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, reviewerId])
+  @@index([propertyId])
+  @@map("reviews")
+}
+
+model Favorite {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  propertyId String   @map("property_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@map("favorites")
+}
+
+enum ExperienceCategory {
+  food
+  culture
+  nature
+  nightlife
+  history
+  market
+  beach
+  adventure
+}
+
+model Experience {
+  id           String             @id @default(uuid()) @db.Uuid
+  title        String             @db.VarChar(150)
+  description  String
+  category     ExperienceCategory
+  hostName     String             @map("host_name") @db.VarChar(100)
+  region       String             @db.VarChar(50)
+  cityTown     String             @map("city_town") @db.VarChar(50)
+  neighborhood String?            @db.VarChar(50)
+  latitude     Decimal            @db.Decimal(10, 7)
+  longitude    Decimal            @db.Decimal(10, 7)
+  priceGhs     Decimal            @map("price_ghs") @db.Decimal(10, 2)
+  durationHours Float             @map("duration_hours")
+  imageUrl     String             @map("image_url")
+  rating       Float              @default(4.8)
+  reviewCount  Int                @default(0) @map("review_count")
+  isActive     Boolean            @default(true) @map("is_active")
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([region])
+  @@index([cityTown])
+  @@map("experiences")
+}
+
+// ---------------------------------------------------------------------------
+// In-app messaging: one thread per (property, renter, landlord) pair so a
+// renter chatting about two different listings from the same landlord gets
+// two separate threads.
+// ---------------------------------------------------------------------------
+model ChatThread {
+  id            String   @id @default(uuid()) @db.Uuid
+  propertyId    String   @map("property_id") @db.Uuid
+  renterId      String   @map("renter_id") @db.Uuid
+  landlordId    String   @map("landlord_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastMessageAt DateTime @default(now()) @map("last_message_at") @db.Timestamptz(6)
+
+  property Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  renter   User          @relation("RenterThreads", fields: [renterId], references: [id], onDelete: Cascade)
+  landlord User          @relation("LandlordThreads", fields: [landlordId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+  reviews  UserReview[]
+
+  @@unique([propertyId, renterId, landlordId])
+  @@index([renterId])
+  @@index([landlordId])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id        String    @id @default(uuid()) @db.Uuid
+  threadId  String    @map("thread_id") @db.Uuid
+  senderId  String    @map("sender_id") @db.Uuid
+  body      String
+  readAt    DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("chat_messages")
+}
+
+// ---------------------------------------------------------------------------
+// Anti-scam: let anyone signed in flag a listing. Flags feed an admin queue
+// and a lightweight auto-hide rule (see lib/reports.ts).
+// ---------------------------------------------------------------------------
+enum ReportReason {
+  not_owner
+  stolen_photos
+  price_too_good
+  already_rented
+  wrong_location
+  requested_upfront_payment
+  other
+}
+
+enum ReportStatus {
+  pending
+  reviewing
+  resolved
+  dismissed
+}
+
+model ListingReport {
+  id         String       @id @default(uuid()) @db.Uuid
+  propertyId String       @map("property_id") @db.Uuid
+  reporterId String       @map("reporter_id") @db.Uuid
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(pending)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reporter User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, reporterId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("listing_reports")
+}
+
+// A viewing request or a rental application. Completing an application is the
+// record that someone moved in, and the only event that opens reviews.
+model RentalRequest {
+  id              String               @id @default(uuid()) @db.Uuid
+  propertyId      String               @map("property_id") @db.Uuid
+  renterId        String               @map("renter_id") @db.Uuid
+  landlordId      String               @map("landlord_id") @db.Uuid
+  kind            RentalRequestKind
+  status          RentalRequestStatus  @default(requested)
+  message         String?
+  viewingAt       DateTime?            @map("viewing_at") @db.Timestamptz(6)
+  moveInDate      DateTime?            @map("move_in_date") @db.Date
+  offeredAdvance  PaymentFrequency?    @map("offered_advance")
+  advanceReceipt  AdvanceReceiptStatus @default(not_recorded) @map("advance_receipt")
+  landlordNote    String?              @map("landlord_note")
+  monthlyIncome   Decimal?             @map("monthly_income") @db.Decimal(12, 2)
+  employmentStatus String?             @map("employment_status") @db.VarChar(30)
+  previousLandlordName String?         @map("previous_landlord_name") @db.VarChar(100)
+  previousLandlordPhone String?        @map("previous_landlord_phone") @db.VarChar(20)
+  previousLandlordNote String?         @map("previous_landlord_note")
+  agreedPrice     Decimal?             @map("agreed_price") @db.Decimal(10, 2)
+  agreedDeposit   Decimal?             @map("agreed_deposit") @db.Decimal(10, 2)
+  agreedAdvance   PaymentFrequency?    @map("agreed_advance")
+  agreedMoveIn    DateTime?            @map("agreed_move_in") @db.Date
+  agreedRules     String?              @map("agreed_rules")
+  holdUntil       DateTime?            @map("hold_until") @db.Timestamptz(6)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  decidedAt       DateTime?            @map("decided_at") @db.Timestamptz(6)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  renter   User     @relation("RenterRequests", fields: [renterId], references: [id], onDelete: Cascade)
+  landlord User     @relation("LandlordRequests", fields: [landlordId], references: [id], onDelete: Cascade)
+  ledger    RentLedgerEntry[]
+  handover  DepositHandover?
+  agreement TenancyAgreement?
+
+  @@index([propertyId])
+  @@index([renterId])
+  @@index([landlordId, status])
+  @@map("rental_requests")
+}
+
+model PriceChange {
+  id             String   @id @default(uuid()) @db.Uuid
+  propertyId     String   @map("property_id") @db.Uuid
+  pricePerMonth  Decimal  @map("price_per_month") @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("price_changes")
+}
+
+model RentLedgerEntry {
+  id              String       @id @default(uuid()) @db.Uuid
+  rentalRequestId String       @map("rental_request_id") @db.Uuid
+  label           String       @db.VarChar(80)
+  amount          Decimal      @db.Decimal(12, 2)
+  dueDate         DateTime     @map("due_date") @db.Date
+  status          LedgerStatus @default(expected)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+
+  @@index([rentalRequestId])
+  @@map("rent_ledger_entries")
+}
+
+model DepositHandover {
+  id              String   @id @default(uuid()) @db.Uuid
+  rentalRequestId String   @unique @map("rental_request_id") @db.Uuid
+  conditionNote   String?  @map("condition_note")
+  deductions      Decimal  @default(0) @db.Decimal(10, 2)
+  returnedAmount  Decimal? @map("returned_amount") @db.Decimal(10, 2)
+  landlordConfirmed Boolean @default(false) @map("landlord_confirmed")
+  renterConfirmed Boolean @default(false) @map("renter_confirmed")
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+
+  @@map("deposit_handovers")
+}
+
+// The written record of an accepted tenancy. The body is frozen when the
+// landlord signs. The tenant cosigns the same text.
+model TenancyAgreement {
+  id                 String    @id @default(uuid()) @db.Uuid
+  rentalRequestId    String    @unique @map("rental_request_id") @db.Uuid
+  body               String
+  landlordSignedName String    @map("landlord_signed_name") @db.VarChar(100)
+  landlordSignedAt   DateTime  @default(now()) @map("landlord_signed_at") @db.Timestamptz(6)
+  renterSignedName   String?   @map("renter_signed_name") @db.VarChar(100)
+  renterSignedAt     DateTime? @map("renter_signed_at") @db.Timestamptz(6)
+
+  rentalRequest RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+
+  @@map("tenancy_agreements")
+}
+
+// ---------------------------------------------------------------------------
+// Crowdsourced neighborhood reliability: renters who have actually lived
+// somewhere rate power (dumsor), water and safety so future renters know
+// what a listing's photos can't show them.
+// ---------------------------------------------------------------------------
+model NeighborhoodInsight {
+  id           String   @id @default(uuid()) @db.Uuid
+  reporterId   String   @map("reporter_id") @db.Uuid
+  neighborhood String   @db.VarChar(50)
+  cityTown     String   @map("city_town") @db.VarChar(50)
+  powerRating  Int      @map("power_rating")
+  waterRating  Int      @map("water_rating")
+  safetyRating Int      @map("safety_rating")
+  comment      String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  reporter User @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([neighborhood, cityTown])
+  @@map("neighborhood_insights")
+}
+
+// ---------------------------------------------------------------------------
+// Manual identity verification (upload ID + selfie for admin review).
+// Coexists with Ghana Card NFC VerificationSession flow.
+// ---------------------------------------------------------------------------
+enum VerificationDocumentType {
+  ghana_card
+  passport
+  drivers_license
+}
+
+model IdentityVerificationRequest {
+  id            String                   @id @default(uuid()) @db.Uuid
+  userId        String                   @map("user_id") @db.Uuid
+  documentType  VerificationDocumentType @map("document_type")
+  idNumber      String                   @map("id_number") @db.VarChar(30)
+  idPhotoUrl    String                   @map("id_photo_url")
+  selfieUrl     String                   @map("selfie_url")
+  status        VerificationStatus       @default(pending)
+  reviewerNotes String?                  @map("reviewer_notes")
+  createdAt     DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  reviewedAt    DateTime?                @map("reviewed_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("identity_verification_requests")
+}
+
+// ---------------------------------------------------------------------------
+// Two-way trust: after chatting about a listing, either side can rate the other.
+// ---------------------------------------------------------------------------
+model UserReview {
+  id         String   @id @default(uuid()) @db.Uuid
+  threadId   String   @map("thread_id") @db.Uuid
+  reviewerId String   @map("reviewer_id") @db.Uuid
+  revieweeId String   @map("reviewee_id") @db.Uuid
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  thread   ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  reviewer User       @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User       @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, reviewerId])
+  @@index([revieweeId])
+  @@map("user_reviews")
+}

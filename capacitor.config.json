@@ -1,0 +1,19 @@
+{
+  "appId": "com.sheltergh.app",
+  "appName": "Asetena Pa",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#F8FAFC",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F8FAFC"
+    }
+  }
+}

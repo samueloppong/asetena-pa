@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "sheltergh-with-new-features", "sheltergh-with-new-features-enhanced"]
 }
