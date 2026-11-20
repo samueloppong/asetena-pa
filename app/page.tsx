@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ExploreClient } from "@/components/explore/ExploreClient";
 import { listExperiences } from "@/lib/experiences";
 import { listPropertiesFromDb } from "@/lib/properties";
@@ -19,9 +20,17 @@ export default async function ExplorePage() {
   }
 
   return (
-    <ExploreClient
-      initialProperties={initialProperties}
-      initialExperiences={initialExperiences}
-    />
+    <Suspense
+      fallback={
+        <div className="px-4 py-20 text-center text-sm text-muted-foreground">
+          Loading homes…
+        </div>
+      }
+    >
+      <ExploreClient
+        initialProperties={initialProperties}
+        initialExperiences={initialExperiences}
+      />
+    </Suspense>
   );
 }

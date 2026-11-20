@@ -19,6 +19,8 @@ export async function fetchProperties(params?: {
   minBeds?: string;
   availableBy?: string;
   billsIncluded?: boolean;
+  minPrice?: string;
+  maxPrice?: string;
 }): Promise<AppProperty[]> {
   const search = new URLSearchParams();
   if (params?.q) search.set("q", params.q);
@@ -30,6 +32,8 @@ export async function fetchProperties(params?: {
   if (params?.minBeds) search.set("min_beds", params.minBeds);
   if (params?.availableBy) search.set("available_by", params.availableBy);
   if (params?.billsIncluded) search.set("bills_included", "true");
+  if (params?.minPrice) search.set("min_price", params.minPrice);
+  if (params?.maxPrice) search.set("max_price", params.maxPrice);
   const qs = search.toString();
   const res = await fetch(`/api/v1/properties${qs ? `?${qs}` : ""}`, {
     cache: "no-store",

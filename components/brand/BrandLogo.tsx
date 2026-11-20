@@ -15,7 +15,7 @@ interface BrandLogoProps {
 }
 
 /**
- * Asetena Pa lockup: Adinkra-inspired mark + Space Grotesk wordmark.
+ * Asetena Pa lockup: Adinkra-inspired mark + Manrope wordmark.
  */
 export function BrandLogo({
   className,

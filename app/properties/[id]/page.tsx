@@ -74,7 +74,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   }
 
   return (
-    <main className="pb-36">
+    <main className="pb-44 lg:pb-28">
       <div className="sticky top-0 z-30 flex items-center justify-between bg-white/90 px-4 py-3 backdrop-blur-xl sm:static sm:bg-transparent sm:px-4 sm:pt-4">
         <Link
           href="/"

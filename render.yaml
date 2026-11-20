@@ -1,0 +1,47 @@
+# Asetena Pa — Render Blueprint (web + Postgres)
+# Free-tier friendly for live testing. Uploads fall back to ephemeral disk if MinIO is unset.
+
+databases:
+  - name: asetena-pa-db
+    plan: free
+    databaseName: asetena
+    user: asetena
+
+services:
+  - type: web
+    name: asetena-pa
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npx tsx prisma/seed.ts && npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: asetena-pa-db
+          property: connectionString
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: NEXTAUTH_URL
+        value: https://asetena-pa.onrender.com
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://asetena-pa.onrender.com
+      # Optional later: wire Render Disk or S3/MinIO for persistent uploads
+      - key: MINIO_ENDPOINT
+        sync: false
+      - key: MINIO_PUBLIC_URL
+        sync: false
+      - key: MINIO_BUCKET
+        sync: false
+      - key: MINIO_ROOT_USER
+        sync: false
+      - key: MINIO_ROOT_PASSWORD
+        sync: false
+      - key: MINIO_REGION
+        value: us-east-1

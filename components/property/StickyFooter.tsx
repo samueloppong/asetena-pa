@@ -54,7 +54,7 @@ export function StickyFooter({
   }
 
   return (
-    <div className="glass-bar fixed inset-x-0 bottom-16 z-40 border-t pb-[env(safe-area-inset-bottom)] sm:bottom-16">
+    <div className="glass-bar fixed inset-x-0 bottom-[6.25rem] z-40 border-t pb-[env(safe-area-inset-bottom)] lg:bottom-0">
       <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-bold text-foreground">

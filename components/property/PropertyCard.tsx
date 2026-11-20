@@ -93,16 +93,14 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
     <Link
       href={`/properties/${property.id}`}
       className={cn(
-        "listing-card group flex overflow-hidden",
-        compact ? "flex-col rounded-2xl" : "flex-row rounded-[1.25rem]"
+        "listing-card group flex flex-col overflow-hidden rounded-[1rem]",
+        compact && "h-full"
       )}
     >
       <div
         className={cn(
           "relative shrink-0 overflow-hidden bg-secondary",
-          compact
-            ? "aspect-[4/3]"
-            : "aspect-auto w-[38%] min-h-36 sm:w-[42%] sm:min-h-56"
+          compact ? "aspect-[4/3]" : "aspect-[4/3]"
         )}
       >
         {cover && (
@@ -168,9 +166,19 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
         )}
       </div>
 
-      <div className={cn("flex min-w-0 flex-1 flex-col", compact ? "gap-1 p-3" : "gap-1 p-3 sm:gap-1.5 sm:p-4")}>
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col",
+          compact ? "gap-1 p-3.5" : "gap-1.5 p-4"
+        )}
+      >
         <div className="flex items-start justify-between gap-2">
-          <p className={cn("font-bold tracking-[-0.03em] text-brand", compact ? "text-sm" : "text-base sm:text-xl")}>
+          <p
+            className={cn(
+              "font-heading font-bold tracking-[-0.03em] text-brand",
+              compact ? "text-base" : "text-[1.35rem]"
+            )}
+          >
             {formatPricePerMonth(property.price_per_month)}
           </p>
           <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium">
@@ -178,21 +186,30 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
             {property.review_count > 0 ? property.rating.toFixed(1) : "New"}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground">{ADVANCE_LABELS[property.advance_period]}</p>
-        <p className="flex items-center gap-1 text-sm font-medium text-foreground">
-          <MapPin className="size-3.5 shrink-0 text-primary" />
-          <span className="truncate">{formatLocation(property.neighborhood, property.city_town)}</span>
+        <p className="text-xs text-muted-foreground">
+          {ADVANCE_LABELS[property.advance_period]}
         </p>
-        <h3 className="line-clamp-1 text-sm font-semibold leading-snug text-foreground">
+        <h3 className="line-clamp-1 font-heading text-[0.95rem] font-semibold leading-snug text-foreground sm:text-base">
           {property.title}
         </h3>
+        <p className="flex items-center gap-1 text-sm text-muted-foreground">
+          <MapPin className="size-3.5 shrink-0 text-gold" />
+          <span className="truncate">
+            {formatLocation(property.neighborhood, property.city_town)}
+          </span>
+        </p>
         <p className="text-xs text-muted-foreground">
           {`${property.bedrooms} ${property.bedrooms === 1 ? "bed" : "beds"} · ${property.bathrooms} ${property.bathrooms === 1 ? "bath" : "baths"} · ${PROPERTY_TYPE_LABELS[property.property_type]} · ${FURNISHING_LABEL[property.furnishing]}`}
         </p>
         {!compact && (
-          <p className="line-clamp-2 hidden text-sm leading-relaxed text-muted-foreground sm:block">
+          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {property.description}
           </p>
+        )}
+        {!compact && (
+          <span className="mt-auto pt-2 text-sm font-semibold text-foreground underline-offset-2 group-hover:underline">
+            View Property
+          </span>
         )}
       </div>
     </Link>

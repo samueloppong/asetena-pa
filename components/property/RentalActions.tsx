@@ -135,7 +135,7 @@ export function RentalActions({
   }
 
   return (
-    <div className="glass-bar fixed inset-x-0 bottom-16 z-40 border-t pb-[env(safe-area-inset-bottom)] sm:bottom-16">
+    <div className="glass-bar fixed inset-x-0 bottom-[6.25rem] z-40 border-t pb-[env(safe-area-inset-bottom)] lg:bottom-0">
       {kind && (
         <form
           onSubmit={onSubmit}
