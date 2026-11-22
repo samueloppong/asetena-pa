@@ -63,22 +63,40 @@ export default function ProfilePage() {
     };
   }, [status]);
 
-  async function becomeLandlord() {
+  const [firmName, setFirmName] = useState("");
+
+  async function becomeListingRole(
+    role: "landlord" | "agent" | "firm",
+    companyName?: string
+  ) {
     if (kycStatus !== "verified") {
       toast.message("Verify your Ghana Card first");
+      return;
+    }
+    if (role === "firm" && (!companyName || companyName.trim().length < 2)) {
+      toast.error("Enter your firm or building society name");
       return;
     }
     const res = await fetch("/api/v1/me/role", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "landlord" }),
+      body: JSON.stringify({
+        role,
+        ...(role === "firm" ? { companyName: companyName!.trim() } : {}),
+      }),
     });
     if (!res.ok) {
       toast.error("Could not update role");
       return;
     }
-    await update({ role: "landlord" });
-    toast.success("You can now list properties");
+    await update({ role });
+    toast.success(
+      role === "firm"
+        ? "You can now list as a firm"
+        : role === "agent"
+          ? "You can now list as a letting agent"
+          : "You can now list as a landlord"
+    );
   }
 
   if (status === "loading") {
@@ -224,13 +242,41 @@ export default function ProfilePage() {
           </Link>
         )}
         {session.user.role === "renter" && (
-          <Button
-            type="button"
-            className="h-11 rounded-xl"
-            onClick={becomeLandlord}
-          >
-            Become a landlord
-          </Button>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                className="h-11 rounded-xl"
+                onClick={() => becomeListingRole("landlord")}
+              >
+                Become a landlord
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 rounded-xl"
+                onClick={() => becomeListingRole("agent")}
+              >
+                Become an agent
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={firmName}
+                onChange={(e) => setFirmName(e.target.value)}
+                placeholder="Firm / building society name"
+                className="h-11 min-w-0 flex-1 rounded-xl border border-input bg-white px-3 text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 shrink-0 rounded-xl"
+                onClick={() => becomeListingRole("firm", firmName)}
+              >
+                Become a firm
+              </Button>
+            </div>
+          </div>
         )}
         <Link
           href="/post"

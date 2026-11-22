@@ -61,7 +61,8 @@ function agreementBody(input: {
     "House rules and bills",
     input.rules?.trim() || "No extra house rules were recorded.",
     "",
-    "The tenant pays the rent in advance for the period above. The landlord holds the deposit and accounts for it when the tenant leaves.",
+    "The tenant pays the rent in advance for the period above.",
+    "The landlord holds the security deposit. When the tenant leaves or the agreed stay ends, the landlord may charge the deposit for damage, missing items, or unpaid bills. Any balance left is returned after both sides confirm the deposit handover on Asetena Pa.",
     "Each person signs by typing the full name on their Asetena Pa account. The wording above does not change after the landlord signs.",
   ].join("\n");
 }

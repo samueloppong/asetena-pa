@@ -76,6 +76,7 @@ export async function PATCH(request: Request, context: RouteContext) {
           : data.availability === "available"
             ? true
             : undefined,
+      stayDuration: data.stayDuration,
       furnishing: data.furnishing,
       availableFrom:
         data.availableFrom === undefined

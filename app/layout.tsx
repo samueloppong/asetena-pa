@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, Manrope } from "next/font/google";
+import { Geist_Mono, Space_Grotesk } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NewListingAlerts } from "@/components/alerts/NewListingAlerts";
 import { BottomNav } from "@/components/nav/BottomNav";
@@ -7,16 +7,10 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -25,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Asetena Pa — Rent Direct from Owners in Ghana",
+  title: "Asetena Pa — Accountable Lettings in Ghana",
   description:
-    "Discover beautiful homes across Ghana, directly from verified property owners. No agents. No unnecessary fees.",
+    "Discover homes across Ghana from landlords and letting agents — one platform for accountable lettings.",
   icons: {
     icon: [{ url: "/brand/asetena-pa-mark.jpg", type: "image/jpeg" }],
     apple: [{ url: "/brand/asetena-pa-mark.jpg" }],
@@ -42,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${geistMono.variable} h-full`}
+      className={`${spaceGrotesk.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full font-sans text-foreground">
         <Providers>

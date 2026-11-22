@@ -40,9 +40,12 @@ function rulesText(property: {
 }) {
   const lines = [
     `Pets: ${property.petsAllowed ? "allowed" : "not allowed"}`,
-    `Smoking: ${property.smokingAllowed ? "allowed" : "not allowed"}`,
+    `Smoking: ${property.smokingAllowed ? "allowed" : "not allowed (no smoking)"}`,
     property.quietHours ? `Quiet hours: ${property.quietHours}` : null,
-    property.maxOccupants ? `Maximum occupants: ${property.maxOccupants}` : null,
+    property.maxOccupants
+      ? `Maximum persons who can stay: ${property.maxOccupants}`
+      : null,
+    "Security deposit may be charged for damage, missing items, or unpaid bills when the tenant leaves or the stay ends; any balance is returned after handover.",
     `ECG: ${BILL_LABEL[property.billsElectricity]}`,
     `Water: ${BILL_LABEL[property.billsWater]}`,
     `Internet: ${BILL_LABEL[property.billsInternet]}`,

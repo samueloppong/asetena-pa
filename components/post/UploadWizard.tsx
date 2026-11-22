@@ -1,6 +1,7 @@
 "use client";
 
 import { PropertyImage } from "@/components/property/PropertyImage";
+import { FurnishingRadios } from "@/components/property/FurnishingRadios";
 import {
   GpsCapturePanel,
   type GpsCapture,
@@ -25,10 +26,22 @@ import {
   ADVANCE_LABELS,
   PROPERTY_TYPE_LABELS,
   ROOM_CATEGORY_LABELS,
+  STAY_DURATION_OPTIONS,
+  formatGhs,
   formatPricePerMonth,
 } from "@/lib/format";
 import { GHANA_REGIONS, getRegionByName } from "@/lib/ghana-locations";
 import { unlockListingChime, playListingChime } from "@/lib/listing-chime";
+import {
+  ADVANCE_OPTIONS,
+  BATHROOM_OPTIONS,
+  BEDROOM_OPTIONS,
+  DEPOSIT_MONTH_OPTIONS,
+  MAX_PERSONS_OPTIONS,
+  bathroomLabel,
+  bedroomLabel,
+  depositFromMonths,
+} from "@/lib/listing-options";
 import { markPropertySeen } from "@/lib/use-new-listing-alerts";
 import type {
   BillPayer,
@@ -37,8 +50,10 @@ import type {
   PropertyAmenities,
   PropertyType,
   RoomCategory,
+  StayDuration,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { OptionChipSelect } from "@/components/property/OptionChipSelect";
 
 const STEPS = ["Media", "Details", "GPS Check", "Specs", "Review"] as const;
 
@@ -56,14 +71,6 @@ const TYPE_OPTIONS: PropertyType[] = [
   "house",
   "chamber_and_hall",
   "single_room",
-  "short_stay",
-];
-
-const ADVANCE_OPTIONS: PaymentFrequency[] = [
-  "monthly",
-  "six_months",
-  "one_year",
-  "two_years",
 ];
 
 const AMENITY_FIELDS: {
@@ -72,6 +79,7 @@ const AMENITY_FIELDS: {
 }[] = [
   { key: "has_polytank_water", label: "Polytank / 24/7 water" },
   { key: "has_standby_generator", label: "Standby generator" },
+  { key: "has_solar", label: "Solar power" },
   { key: "has_air_conditioning", label: "Air conditioning" },
   { key: "is_walled_and_gated", label: "Walled & gated" },
   { key: "has_self_meter", label: "Self ECG prepaid meter" },
@@ -90,7 +98,7 @@ interface DraftState {
   description: string;
   property_type: PropertyType;
   price_per_month: string;
-  security_deposit: string;
+  deposit_months: string;
   digital_address: string;
   advance_period: PaymentFrequency;
   bedrooms: string;
@@ -98,6 +106,7 @@ interface DraftState {
   neighborhood: string;
   city_town: string;
   region: string;
+  stay_duration: StayDuration;
   furnishing: Furnishing;
   available_from: string;
   bills_electricity: BillPayer;
@@ -117,7 +126,7 @@ const defaultDraft: DraftState = {
   description: "",
   property_type: "apartment",
   price_per_month: "",
-  security_deposit: "",
+  deposit_months: "1",
   digital_address: "",
   advance_period: "six_months",
   bedrooms: "1",
@@ -125,6 +134,7 @@ const defaultDraft: DraftState = {
   neighborhood: "",
   city_town: "Accra",
   region: "Greater Accra",
+  stay_duration: "long_stay",
   furnishing: "unfurnished",
   available_from: "",
   bills_electricity: "tenant",
@@ -132,12 +142,13 @@ const defaultDraft: DraftState = {
   bills_internet: "tenant",
   pets_allowed: false,
   smoking_allowed: false,
-  max_occupants: "",
+  max_occupants: "2",
   quiet_hours: "",
   house_rules: "",
   amenities: {
     has_polytank_water: true,
     has_standby_generator: false,
+    has_solar: false,
     has_air_conditioning: false,
     is_walled_and_gated: true,
     has_self_meter: true,
@@ -167,17 +178,24 @@ export function UploadWizard() {
         priceNum > 0 &&
         draft.region.trim().length > 1 &&
         draft.city_town.trim().length > 1 &&
-        draft.neighborhood.trim().length > 1
+        draft.neighborhood.trim().length > 1 &&
+        draft.deposit_months !== "" &&
+        Number(draft.max_occupants) >= 1 &&
+        Boolean(draft.advance_period)
       );
     if (step === 2) return Boolean(gps?.verified);
     if (step === 3)
-      return Number(draft.bedrooms) >= 0 && draft.description.length >= 10;
+      return (
+        Number(draft.bedrooms) >= 0 &&
+        Number(draft.bathrooms) >= 1 &&
+        draft.description.length >= 10
+      );
     return true;
   }, [step, draft, priceNum, gps]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      toast.message("Sign in as a landlord to list a home");
+      toast.message("Sign in as a landlord, agent, or firm to list a home");
       router.push("/login");
     }
   }, [status, router]);
@@ -194,7 +212,12 @@ export function UploadWizard() {
       router.push("/verify");
       return false;
     }
-    if (session.user.role === "landlord" || session.user.role === "admin") {
+    if (
+      session.user.role === "landlord" ||
+      session.user.role === "agent" ||
+      session.user.role === "firm" ||
+      session.user.role === "admin"
+    ) {
       return true;
     }
     const res = await fetch("/api/v1/me/role", {
@@ -252,9 +275,20 @@ export function UploadWizard() {
       setStep(2);
       return;
     }
-    const deposit = Number(draft.security_deposit);
-    if (draft.security_deposit === "" || Number.isNaN(deposit) || deposit < 0) {
-      toast.error("Enter a security deposit, or 0 if there is none");
+    const depositMonths = Number(draft.deposit_months);
+    if (
+      draft.deposit_months === "" ||
+      Number.isNaN(depositMonths) ||
+      depositMonths < 0
+    ) {
+      toast.error("Select a security deposit option");
+      setStep(1);
+      return;
+    }
+    const deposit = depositFromMonths(priceNum, depositMonths);
+    const maxOccupants = Number(draft.max_occupants);
+    if (!draft.max_occupants || Number.isNaN(maxOccupants) || maxOccupants < 1) {
+      toast.error("Select the maximum number of persons who can stay");
       setStep(1);
       return;
     }
@@ -294,11 +328,13 @@ export function UploadWizard() {
           amenities: {
             hasPolytankWater: draft.amenities.has_polytank_water,
             hasStandbyGenerator: draft.amenities.has_standby_generator,
+            hasSolar: draft.amenities.has_solar,
             hasAirConditioning: draft.amenities.has_air_conditioning,
             isWalledAndGated: draft.amenities.is_walled_and_gated,
             hasSelfMeter: draft.amenities.has_self_meter,
             hasParkingSpace: draft.amenities.has_parking_space,
           },
+          stayDuration: draft.stay_duration,
           furnishing: draft.furnishing,
           availableFrom: draft.available_from || null,
           billsElectricity: draft.bills_electricity,
@@ -306,7 +342,7 @@ export function UploadWizard() {
           billsInternet: draft.bills_internet,
           petsAllowed: draft.pets_allowed,
           smokingAllowed: draft.smoking_allowed,
-          maxOccupants: draft.max_occupants ? Number(draft.max_occupants) : null,
+          maxOccupants,
           quietHours: draft.quiet_hours || null,
           houseRules: draft.house_rules || null,
           media: draft.media,
@@ -469,6 +505,24 @@ export function UploadWizard() {
             </div>
           </div>
 
+          <OptionChipSelect
+            legend="Stay duration"
+            hint="Long stay is the default for rentals. Short stay is for nights or weeks."
+            options={STAY_DURATION_OPTIONS}
+            value={draft.stay_duration}
+            onChange={(stay_duration) =>
+              setDraft({
+                ...draft,
+                stay_duration: stay_duration as StayDuration,
+                furnishing:
+                  stay_duration === "short_stay"
+                    ? "furnished"
+                    : draft.furnishing,
+              })
+            }
+            columns={2}
+          />
+
           <div className="space-y-2">
             <Label htmlFor="region">Region (all 16)</Label>
             <select
@@ -527,58 +581,56 @@ export function UploadWizard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="deposit">Security deposit (GHS)</Label>
-              <Input
-                id="deposit"
-                type="number"
-                min={0}
-                value={draft.security_deposit}
-                onChange={(e) =>
-                  setDraft({ ...draft, security_deposit: e.target.value })
-                }
-                className="h-11 rounded-xl"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ghanapost">GhanaPost address</Label>
-              <Input
-                id="ghanapost"
-                value={draft.digital_address}
-                onChange={(e) =>
-                  setDraft({ ...draft, digital_address: e.target.value })
-                }
-                placeholder="GA-183-4921"
-                className="h-11 rounded-xl"
-              />
-            </div>
+          <OptionChipSelect
+            legend="Security deposit"
+            hint={
+              priceNum > 0
+                ? `Held at move-in. Selected: ${
+                    DEPOSIT_MONTH_OPTIONS.find(
+                      (o) => String(o.months) === draft.deposit_months
+                    )?.label ?? ""
+                  }${
+                    Number(draft.deposit_months) > 0
+                      ? ` (${formatGhs(depositFromMonths(priceNum, Number(draft.deposit_months)))})`
+                      : ""
+                  }. Charged at end of stay if there is damage or unpaid bills.`
+                : "Held at move-in. Amount is months of rent — enter monthly rent first to see GHS."
+            }
+            options={DEPOSIT_MONTH_OPTIONS.map((o) => ({
+              value: String(o.months),
+              label: o.label,
+            }))}
+            value={draft.deposit_months}
+            onChange={(deposit_months) => setDraft({ ...draft, deposit_months })}
+            columns={2}
+          />
+
+          <div className="space-y-2">
+            <Label htmlFor="ghanapost">GhanaPost address</Label>
+            <Input
+              id="ghanapost"
+              value={draft.digital_address}
+              onChange={(e) =>
+                setDraft({ ...draft, digital_address: e.target.value })
+              }
+              placeholder="GA-183-4921"
+              className="h-11 rounded-xl"
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="furnishing">Furnishing</Label>
-              <select
-                id="furnishing"
-                value={draft.furnishing}
-                onChange={(e) => setDraft({ ...draft, furnishing: e.target.value as Furnishing })}
-                className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
-              >
-                <option value="unfurnished">Unfurnished</option>
-                <option value="semi_furnished">Semi-furnished</option>
-                <option value="furnished">Furnished</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="available-from">Free from</Label>
-              <Input
-                id="available-from"
-                type="date"
-                value={draft.available_from}
-                onChange={(e) => setDraft({ ...draft, available_from: e.target.value })}
-                className="h-11 rounded-xl"
-              />
-            </div>
+          <FurnishingRadios
+            value={draft.furnishing}
+            onChange={(furnishing) => setDraft({ ...draft, furnishing })}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="available-from">Free from</Label>
+            <Input
+              id="available-from"
+              type="date"
+              value={draft.available_from}
+              onChange={(e) => setDraft({ ...draft, available_from: e.target.value })}
+              className="h-11 rounded-xl"
+            />
           </div>
           <div className="grid grid-cols-3 gap-2">
             {(
@@ -617,25 +669,34 @@ export function UploadWizard() {
                 checked={draft.smoking_allowed}
                 onChange={(e) => setDraft({ ...draft, smoking_allowed: e.target.checked })}
               />
-              Smoking allowed
+              Smoking allowed (off = no smoking)
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <OptionChipSelect
+            legend="Max persons who can stay"
+            options={MAX_PERSONS_OPTIONS.map((n) => ({
+              value: String(n),
+              label: String(n),
+            }))}
+            value={draft.max_occupants}
+            onChange={(max_occupants) => setDraft({ ...draft, max_occupants })}
+            columns={5}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="quiet-hours">Quiet hours</Label>
             <Input
-              type="number"
-              min={1}
-              value={draft.max_occupants}
-              onChange={(e) => setDraft({ ...draft, max_occupants: e.target.value })}
-              placeholder="Max occupants"
-              className="h-11 rounded-xl"
-            />
-            <Input
+              id="quiet-hours"
               value={draft.quiet_hours}
               onChange={(e) => setDraft({ ...draft, quiet_hours: e.target.value })}
-              placeholder="Quiet hours"
+              placeholder="e.g. 10pm–6am"
               className="h-11 rounded-xl"
             />
           </div>
+          {draft.stay_duration === "short_stay" && (
+            <p className="text-[11px] text-muted-foreground">
+              Short stays default to furnished — change the radio above if needed.
+            </p>
+          )}
           <Textarea
             value={draft.house_rules}
             onChange={(e) => setDraft({ ...draft, house_rules: e.target.value })}
@@ -662,28 +723,22 @@ export function UploadWizard() {
             </datalist>
           </div>
 
-          <div className="space-y-2">
-            <Label>Advance period</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {ADVANCE_OPTIONS.map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() =>
-                    setDraft({ ...draft, advance_period: period })
-                  }
-                  className={cn(
-                    "rounded-xl border px-3 py-2.5 text-xs font-medium",
-                    draft.advance_period === period
-                      ? "border-primary bg-accent"
-                      : "border-border bg-white"
-                  )}
-                >
-                  {ADVANCE_LABELS[period]}
-                </button>
-              ))}
-            </div>
-          </div>
+          <OptionChipSelect
+            legend="Advance / rent length"
+            hint="How much rent tenants must pay upfront"
+            options={ADVANCE_OPTIONS.map((period) => ({
+              value: period,
+              label: ADVANCE_LABELS[period],
+            }))}
+            value={draft.advance_period}
+            onChange={(advance_period) =>
+              setDraft({
+                ...draft,
+                advance_period: advance_period as PaymentFrequency,
+              })
+            }
+            columns={2}
+          />
         </section>
       )}
 
@@ -703,34 +758,26 @@ export function UploadWizard() {
 
       {step === 3 && (
         <section className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="beds">Bedrooms</Label>
-              <Input
-                id="beds"
-                type="number"
-                min={0}
-                value={draft.bedrooms}
-                onChange={(e) =>
-                  setDraft({ ...draft, bedrooms: e.target.value })
-                }
-                className="h-11 rounded-xl"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="baths">Bathrooms</Label>
-              <Input
-                id="baths"
-                type="number"
-                min={0}
-                value={draft.bathrooms}
-                onChange={(e) =>
-                  setDraft({ ...draft, bathrooms: e.target.value })
-                }
-                className="h-11 rounded-xl"
-              />
-            </div>
-          </div>
+          <OptionChipSelect
+            legend="Bedrooms"
+            options={BEDROOM_OPTIONS.map((n) => ({
+              value: String(n),
+              label: bedroomLabel(n),
+            }))}
+            value={draft.bedrooms}
+            onChange={(bedrooms) => setDraft({ ...draft, bedrooms })}
+            columns={4}
+          />
+          <OptionChipSelect
+            legend="Bathrooms"
+            options={BATHROOM_OPTIONS.map((n) => ({
+              value: String(n),
+              label: bathroomLabel(n),
+            }))}
+            value={draft.bathrooms}
+            onChange={(bathrooms) => setDraft({ ...draft, bathrooms })}
+            columns={5}
+          />
           <div className="space-y-2">
             <Label htmlFor="desc">Description</Label>
             <Textarea
@@ -788,8 +835,13 @@ export function UploadWizard() {
             </span>
           </p>
           <p className="text-sm text-muted-foreground">
-            {draft.bedrooms} bed · {draft.bathrooms} bath · {draft.media.length}{" "}
-            photos
+            {bedroomLabel(Number(draft.bedrooms))} ·{" "}
+            {bathroomLabel(Number(draft.bathrooms))} · up to{" "}
+            {draft.max_occupants} persons ·{" "}
+            {Number(draft.deposit_months) > 0
+              ? `deposit ${formatGhs(depositFromMonths(priceNum, Number(draft.deposit_months)))}`
+              : "no deposit"}{" "}
+            · {draft.media.length} photos
           </p>
           {gps?.verified && (
             <p className="text-xs font-medium text-verified">

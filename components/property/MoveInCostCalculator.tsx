@@ -40,7 +40,7 @@ export function MoveInCostCalculator({
       <dl className="space-y-2 text-sm">
         <Row label={`Rent (${months} ${months === 1 ? "month" : "months"} advance)`} value={formatGhs(rentDue)} />
         {securityDeposit > 0 && (
-          <Row label="Security deposit" value={formatGhs(securityDeposit)} />
+          <Row label="Security deposit (held)" value={formatGhs(securityDeposit)} />
         )}
         <div className="my-1 border-t border-dashed border-border" />
         <Row label="Total due at move-in" value={formatGhs(total)} strong />
@@ -54,6 +54,17 @@ export function MoveInCostCalculator({
           </p>
         )}
       </dl>
+      {securityDeposit > 0 ? (
+        <p className="rounded-xl bg-secondary/70 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+          The landlord holds the security deposit. When you leave or your stay
+          ends, damage, missing items, or unpaid bills can be charged against it.
+          What remains is returned after both sides confirm the handover.
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          This listing has no security deposit.
+        </p>
+      )}
     </section>
   );
 }

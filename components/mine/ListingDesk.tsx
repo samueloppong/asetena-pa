@@ -7,7 +7,24 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ADVANCE_LABELS, formatPricePerMonth } from "@/lib/format";
+import {
+  ADVANCE_LABELS,
+  STAY_DURATION_OPTIONS,
+  formatPricePerMonth,
+} from "@/lib/format";
+import {
+  ADVANCE_OPTIONS,
+  BATHROOM_OPTIONS,
+  BEDROOM_OPTIONS,
+  DEPOSIT_MONTH_OPTIONS,
+  MAX_PERSONS_OPTIONS,
+  bathroomLabel,
+  bedroomLabel,
+  depositFromMonths,
+  depositMonthsFromAmount,
+} from "@/lib/listing-options";
+import { FurnishingRadios } from "@/components/property/FurnishingRadios";
+import { OptionChipSelect } from "@/components/property/OptionChipSelect";
 import { TenancyPanel } from "@/components/rentals/TenancyPanel";
 import type {
   ListingAvailability,
@@ -128,17 +145,21 @@ export function ListingDesk() {
   async function saveEdits(property: ManagedProperty, form: FormData) {
     setBusy(property.id);
     try {
+      const price = Number(form.get("price"));
+      const depositMonths = Number(form.get("depositMonths") ?? 0);
       const res = await fetch(`/api/v1/properties/${property.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: String(form.get("title") || ""),
           description: String(form.get("description") || ""),
-          pricePerMonth: Number(form.get("price")),
-          securityDeposit: Number(form.get("deposit")),
+          pricePerMonth: price,
+          advancePeriod: String(form.get("advancePeriod") || property.advance_period),
+          securityDeposit: depositFromMonths(price, depositMonths),
           digitalAddressGhanapost: String(form.get("address") || "") || null,
           bedrooms: Number(form.get("beds")),
           bathrooms: Number(form.get("baths")),
+          stayDuration: String(form.get("stayDuration") || property.stay_duration),
           furnishing: String(form.get("furnishing") || "unfurnished"),
           availableFrom: String(form.get("availableFrom") || "") || null,
           billsElectricity: String(form.get("billsElectricity") || "tenant"),
@@ -146,7 +167,9 @@ export function ListingDesk() {
           billsInternet: String(form.get("billsInternet") || "tenant"),
           petsAllowed: form.get("petsAllowed") === "on",
           smokingAllowed: form.get("smokingAllowed") === "on",
-          maxOccupants: String(form.get("maxOccupants") || "") ? Number(form.get("maxOccupants")) : null,
+          maxOccupants: String(form.get("maxOccupants") || "")
+            ? Number(form.get("maxOccupants"))
+            : null,
           quietHours: String(form.get("quietHours") || "") || null,
           houseRules: String(form.get("houseRules") || "") || null,
           accessInstructions: String(form.get("accessInstructions") || "") || null,
@@ -165,22 +188,24 @@ export function ListingDesk() {
                 title: data.property.title,
                 description: data.property.description,
                 price_per_month: data.property.price_per_month,
+                advance_period: data.property.advance_period,
                 security_deposit: data.property.security_deposit,
                 digital_address_ghanapost: data.property.digital_address_ghanapost,
-          bedrooms: data.property.bedrooms,
-          bathrooms: data.property.bathrooms,
-          furnishing: data.property.furnishing,
-          available_from: data.property.available_from,
-          bills_electricity: data.property.bills_electricity,
-          bills_water: data.property.bills_water,
-          bills_internet: data.property.bills_internet,
-          pets_allowed: data.property.pets_allowed,
-          smoking_allowed: data.property.smoking_allowed,
-          max_occupants: data.property.max_occupants,
-          quiet_hours: data.property.quiet_hours,
-          house_rules: data.property.house_rules,
-          access_instructions: data.property.access_instructions,
-        }
+                bedrooms: data.property.bedrooms,
+                bathrooms: data.property.bathrooms,
+                stay_duration: data.property.stay_duration,
+                furnishing: data.property.furnishing,
+                available_from: data.property.available_from,
+                bills_electricity: data.property.bills_electricity,
+                bills_water: data.property.bills_water,
+                bills_internet: data.property.bills_internet,
+                pets_allowed: data.property.pets_allowed,
+                smoking_allowed: data.property.smoking_allowed,
+                max_occupants: data.property.max_occupants,
+                quiet_hours: data.property.quiet_hours,
+                house_rules: data.property.house_rules,
+                access_instructions: data.property.access_instructions,
+              }
             : item
         ) ?? prev
       );
@@ -347,13 +372,17 @@ export function ListingDesk() {
                           ? AVAILABILITY_LABEL[property.availability]
                           : "Hidden after reports"}
                       {" · "}
-                      {property.is_direct_owner_verified
-                        ? "Owner verified"
-                        : property.ownership_status === "pending"
-                          ? "Ownership under review"
-                          : property.ownership_status === "rejected"
-                            ? "Ownership rejected"
-                            : "Ownership not submitted"}
+                      {property.listing_actor_type === "agent"
+                        ? "Verified agent"
+                        : property.listing_actor_type === "firm"
+                          ? "Verified firm"
+                          : property.is_direct_owner_verified
+                            ? "Owner verified"
+                            : property.ownership_status === "pending"
+                              ? "Ownership under review"
+                              : property.ownership_status === "rejected"
+                                ? "Ownership rejected"
+                                : "Ownership not submitted"}
                     </p>
                   </div>
                 </div>
@@ -387,23 +416,75 @@ export function ListingDesk() {
                   >
                     <Input name="title" defaultValue={property.title} required className="h-11 rounded-xl" />
                     <Textarea name="description" defaultValue={property.description} required />
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input name="price" type="number" min={1} defaultValue={property.price_per_month} required className="h-11 rounded-xl" />
-                      <Input name="deposit" type="number" min={0} defaultValue={property.security_deposit} required className="h-11 rounded-xl" />
-                      <Input name="beds" type="number" min={0} defaultValue={property.bedrooms} required className="h-11 rounded-xl" />
-                      <Input name="baths" type="number" min={0} defaultValue={property.bathrooms} required className="h-11 rounded-xl" />
-                    </div>
+                    <Input
+                      name="price"
+                      type="number"
+                      min={1}
+                      defaultValue={property.price_per_month}
+                      required
+                      className="h-11 rounded-xl"
+                      placeholder="Monthly rent (GHS)"
+                    />
+                    <OptionChipSelect
+                      name="advancePeriod"
+                      legend="Advance / rent length"
+                      options={ADVANCE_OPTIONS.map((period) => ({
+                        value: period,
+                        label: ADVANCE_LABELS[period],
+                      }))}
+                      defaultValue={property.advance_period}
+                      columns={2}
+                    />
+                    <OptionChipSelect
+                      name="depositMonths"
+                      legend="Security deposit"
+                      hint="Held at move-in; charged at end of stay if needed"
+                      options={DEPOSIT_MONTH_OPTIONS.map((o) => ({
+                        value: String(o.months),
+                        label: o.label,
+                      }))}
+                      defaultValue={String(
+                        depositMonthsFromAmount(
+                          property.security_deposit,
+                          property.price_per_month
+                        )
+                      )}
+                      columns={2}
+                    />
+                    <OptionChipSelect
+                      name="beds"
+                      legend="Bedrooms"
+                      options={BEDROOM_OPTIONS.map((n) => ({
+                        value: String(n),
+                        label: bedroomLabel(n),
+                      }))}
+                      defaultValue={String(property.bedrooms)}
+                      columns={4}
+                    />
+                    <OptionChipSelect
+                      name="baths"
+                      legend="Bathrooms"
+                      options={BATHROOM_OPTIONS.map((n) => ({
+                        value: String(n),
+                        label: bathroomLabel(n),
+                      }))}
+                      defaultValue={String(property.bathrooms)}
+                      columns={5}
+                    />
                     <Input
                       name="address"
                       defaultValue={property.digital_address_ghanapost ?? ""}
                       placeholder="GhanaPost address"
                       className="h-11 rounded-xl"
                     />
-                    <select name="furnishing" defaultValue={property.furnishing} className="h-11 rounded-xl border border-input bg-white px-3 text-sm">
-                      <option value="unfurnished">Unfurnished</option>
-                      <option value="semi_furnished">Semi-furnished</option>
-                      <option value="furnished">Furnished</option>
-                    </select>
+                    <OptionChipSelect
+                      name="stayDuration"
+                      legend="Stay duration"
+                      options={STAY_DURATION_OPTIONS}
+                      defaultValue={property.stay_duration ?? "long_stay"}
+                      columns={2}
+                    />
+                    <FurnishingRadios defaultValue={property.furnishing} />
                     <Input name="availableFrom" type="date" defaultValue={property.available_from ?? ""} className="h-11 rounded-xl" />
                     <div className="grid grid-cols-3 gap-2">
                       {(["billsElectricity", "billsWater", "billsInternet"] as const).map((name) => (
@@ -431,9 +512,22 @@ export function ListingDesk() {
                     </label>
                     <label className="flex items-center gap-2 text-sm">
                       <input type="checkbox" name="smokingAllowed" defaultChecked={property.smoking_allowed} />
-                      Smoking allowed
+                      Smoking allowed (off = no smoking)
                     </label>
-                    <Input name="maxOccupants" type="number" min={1} defaultValue={property.max_occupants ?? ""} placeholder="Max occupants" className="h-11 rounded-xl" />
+                    <OptionChipSelect
+                      name="maxOccupants"
+                      legend="Max persons who can stay"
+                      options={MAX_PERSONS_OPTIONS.map((n) => ({
+                        value: String(n),
+                        label: String(n),
+                      }))}
+                      defaultValue={String(
+                        property.max_occupants && property.max_occupants > 0
+                          ? property.max_occupants
+                          : Math.max(1, property.bedrooms * 2 || 2)
+                      )}
+                      columns={5}
+                    />
                     <Input name="quietHours" defaultValue={property.quiet_hours ?? ""} placeholder="Quiet hours" className="h-11 rounded-xl" />
                     <Textarea name="houseRules" defaultValue={property.house_rules ?? ""} placeholder="House rules" />
                     <Textarea name="accessInstructions" defaultValue={property.access_instructions ?? ""} placeholder="Access instructions, shown after accept" />
@@ -442,18 +536,28 @@ export function ListingDesk() {
                     </Button>
                   </form>
                 )}
-                <label className="mt-3 block text-xs text-muted-foreground">
-                  Land title or indenture photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="mt-1 block w-full text-sm"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadOwnership(property.id, file);
-                    }}
-                  />
-                </label>
+                {property.listing_actor_type === "agent" ||
+                property.listing_actor_type === "firm" ? (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {property.listing_actor_type === "firm"
+                      ? "Firm listings stay accountable under your firm account."
+                      : "Agent listings stay accountable under your agent account."}{" "}
+                    Owner land-title verification is for landlord-listed homes.
+                  </p>
+                ) : (
+                  <label className="mt-3 block text-xs text-muted-foreground">
+                    Land title or indenture photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mt-1 block w-full text-sm"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) uploadOwnership(property.id, file);
+                      }}
+                    />
+                  </label>
+                )}
               </li>
             ))}
           </ul>

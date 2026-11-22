@@ -5,18 +5,20 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+type RegisterRole = "renter" | "landlord" | "agent" | "firm";
+
 export function RegisterForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<"renter" | "landlord">("renter");
+  const [role, setRole] = useState<RegisterRole>("renter");
   const [form, setForm] = useState({
     fullName: "",
+    companyName: "",
     email: "",
     phoneNumber: "",
     password: "",
@@ -24,12 +26,20 @@ export function RegisterForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (role === "firm" && form.companyName.trim().length < 2) {
+      toast.error("Enter your firm or building society name");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, role }),
+        body: JSON.stringify({
+          ...form,
+          companyName: role === "firm" ? form.companyName.trim() : null,
+          role,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -59,38 +69,39 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-md space-y-4 px-4 py-8">
-      <div className="space-y-3">
-        <BrandLogo />
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-brand">
-            Create account
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Join Asetena Pa to save homes or list as an owner
-          </p>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        {(["renter", "landlord"] as const).map((r) => (
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {(
+          [
+            ["renter", "Renter"],
+            ["landlord", "Landlord"],
+            ["agent", "Agent"],
+            ["firm", "Firm"],
+          ] as const
+        ).map(([value, label]) => (
           <button
-            key={r}
+            key={value}
             type="button"
-            onClick={() => setRole(r)}
+            onClick={() => setRole(value)}
             className={cn(
-              "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium capitalize",
-              role === r
+              "rounded-xl border px-2 py-2.5 text-sm font-medium",
+              role === value
                 ? "border-primary bg-accent text-foreground"
                 : "border-border bg-white"
             )}
           >
-            {r}
+            {label}
           </button>
         ))}
       </div>
+      <p className="text-xs text-muted-foreground">
+        Landlords, agents, and firms list homes with lettings accountability.
+        Renters search, apply, and rent.
+      </p>
 
       <div className="space-y-2">
-        <Label htmlFor="fullName">Full name</Label>
+        <Label htmlFor="fullName">
+          {role === "firm" ? "Authorised contact name" : "Full name"}
+        </Label>
         <Input
           id="fullName"
           required
@@ -99,6 +110,19 @@ export function RegisterForm() {
           className="h-11 rounded-xl"
         />
       </div>
+      {role === "firm" && (
+        <div className="space-y-2">
+          <Label htmlFor="companyName">Firm / building society name</Label>
+          <Input
+            id="companyName"
+            required
+            value={form.companyName}
+            onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+            placeholder="e.g. Accra Homes Ltd"
+            className="h-11 rounded-xl"
+          />
+        </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

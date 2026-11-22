@@ -42,7 +42,7 @@ export function HeroSection({
         <div className="absolute inset-0 bg-gradient-to-t from-[#171717]/80 via-transparent to-[#171717]/30" />
         {/* Subtle Adinkra watermark */}
         <div
-          className="absolute right-[-4%] bottom-[-8%] size-[22rem] opacity-[0.12]"
+          className="absolute right-[2%] bottom-[4%] size-36 opacity-[0.12] sm:size-44"
           style={{
             backgroundImage: "url(/brand/adinkra/01.png)",
             backgroundSize: "contain",
@@ -60,9 +60,7 @@ export function HeroSection({
             suppressHydrationWarning
           >
             <span className="size-1.5 rounded-full bg-[#e9a92f]" aria-hidden />
-            {liveCount > 0
-              ? `Direct from owners across Ghana · ${liveCount} live`
-              : "Direct from owners across Ghana"}
+            {liveCount > 0 ? `${liveCount} live` : "Browse homes"}
           </p>
           <h1 className="mt-5 font-heading text-[2.5rem] leading-[1.02] font-extrabold tracking-[-0.045em] sm:text-5xl lg:text-[3.75rem]">
             Find a place to{" "}
@@ -71,8 +69,8 @@ export function HeroSection({
             </span>
           </h1>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-[0.95rem]">
-            Discover beautiful homes across Ghana, directly from verified
-            property owners. No agents. No unnecessary fees.
+            One platform for lettings accountability — landlords and agents list
+            homes, renters apply, and every stay is tracked end to end.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a

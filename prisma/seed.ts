@@ -23,10 +23,17 @@ type SeedListing = {
   bedrooms: number;
   bathrooms: number;
   squareFootage?: number;
+  maxOccupants: number;
+  stayDuration?: "long_stay" | "short_stay";
+  furnishing: "unfurnished" | "semi_furnished" | "furnished";
+  smokingAllowed: boolean;
   isDirectOwnerVerified: boolean;
+  /** owner = landlord; agent = letting agent; firm = estate firm / building society */
+  listingActorType?: "owner" | "agent" | "firm";
   amenities: {
     hasPolytankWater: boolean;
     hasStandbyGenerator: boolean;
+    hasSolar?: boolean;
     hasAirConditioning: boolean;
     isWalledAndGated: boolean;
     hasSelfMeter: boolean;
@@ -52,10 +59,14 @@ const listings: SeedListing[] = [
     bedrooms: 4,
     bathrooms: 3,
     squareFootage: 2800,
+    maxOccupants: 8,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: true,
     amenities: {
       hasPolytankWater: true,
       hasStandbyGenerator: true,
+      hasSolar: true,
       hasAirConditioning: true,
       isWalledAndGated: true,
       hasSelfMeter: true,
@@ -96,6 +107,9 @@ const listings: SeedListing[] = [
     bedrooms: 2,
     bathrooms: 2,
     squareFootage: 1200,
+    maxOccupants: 4,
+    furnishing: "furnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: true,
     amenities: {
       hasPolytankWater: true,
@@ -135,6 +149,9 @@ const listings: SeedListing[] = [
     bedrooms: 1,
     bathrooms: 1,
     squareFootage: 450,
+    maxOccupants: 2,
+    furnishing: "unfurnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: true,
     amenities: {
       hasPolytankWater: true,
@@ -170,6 +187,9 @@ const listings: SeedListing[] = [
     bedrooms: 3,
     bathrooms: 2,
     squareFootage: 1800,
+    maxOccupants: 6,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: true,
     amenities: {
       hasPolytankWater: true,
@@ -194,7 +214,8 @@ const listings: SeedListing[] = [
     title: "Osu Short-Stay Studio near Oxford Street",
     description:
       "Stylish furnished studio for short stays. Walk to restaurants and nightlife. Self check-in and AC.",
-    propertyType: "short_stay",
+    propertyType: "apartment",
+    stayDuration: "short_stay",
     pricePerMonth: 4500,
     advancePeriod: "monthly",
     region: "Greater Accra",
@@ -205,6 +226,9 @@ const listings: SeedListing[] = [
     bedrooms: 1,
     bathrooms: 1,
     squareFootage: 380,
+    maxOccupants: 2,
+    furnishing: "furnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: true,
     amenities: {
       hasPolytankWater: true,
@@ -240,6 +264,9 @@ const listings: SeedListing[] = [
     bedrooms: 3,
     bathrooms: 2,
     squareFootage: 1400,
+    maxOccupants: 5,
+    furnishing: "unfurnished",
+    smokingAllowed: false,
     isDirectOwnerVerified: false,
     amenities: {
       hasPolytankWater: true,
@@ -257,6 +284,295 @@ const listings: SeedListing[] = [
       {
         url: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=1200&h=800&fit=crop",
         category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "Airport Residential 2-Bed Listed by Agent",
+    description:
+      "Bright 2-bedroom apartment near Airport Residential, managed by a verified letting agent. Fitted kitchen, standby light, and parking for one car. Viewings arranged in-app.",
+    propertyType: "apartment",
+    pricePerMonth: 2800,
+    advancePeriod: "six_months",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Airport Residential",
+    digitalAddressGhanapost: "GA-150-8842",
+    latitude: 5.605,
+    longitude: -0.178,
+    bedrooms: 2,
+    bathrooms: 2,
+    squareFootage: 1100,
+    maxOccupants: 4,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: false,
+    listingActorType: "agent",
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1200&h=800&fit=crop",
+        category: "kitchen",
+      },
+    ],
+  },
+  {
+    title: "Labadi Beach Road Chamber & Hall (Agent)",
+    description:
+      "Self-contained chamber and hall on Labadi Beach Road. Verified agent handles viewings, applications, and deposit handover on Asetena Pa.",
+    propertyType: "chamber_and_hall",
+    pricePerMonth: 950,
+    advancePeriod: "six_months",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Labadi",
+    latitude: 5.568,
+    longitude: -0.152,
+    bedrooms: 1,
+    bathrooms: 1,
+    squareFootage: 420,
+    maxOccupants: 2,
+    furnishing: "unfurnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: false,
+    listingActorType: "agent",
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: false,
+      hasAirConditioning: false,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: false,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "Tema Community 25 Family House via Agent",
+    description:
+      "4-bedroom family house in Tema Community 25 with compound parking and polytank water. Listed and managed by a verified letting agent for accountable lettings.",
+    propertyType: "house",
+    pricePerMonth: 3200,
+    advancePeriod: "one_year",
+    region: "Greater Accra",
+    cityTown: "Tema",
+    neighborhood: "Community 25",
+    latitude: 5.669,
+    longitude: -0.017,
+    bedrooms: 4,
+    bathrooms: 3,
+    squareFootage: 2100,
+    maxOccupants: 8,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: false,
+    listingActorType: "agent",
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasAirConditioning: false,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop",
+        category: "exterior",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "East Legon Executive Flat — Accra Homes Ltd",
+    description:
+      "Corporate-managed 3-bedroom flat in East Legon. Listed by Accra Homes Ltd with deposit handover and tenancy tracking on Asetena Pa.",
+    propertyType: "apartment",
+    pricePerMonth: 4000,
+    advancePeriod: "one_year",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "East Legon",
+    digitalAddressGhanapost: "GA-292-5501",
+    latitude: 5.638,
+    longitude: -0.151,
+    bedrooms: 3,
+    bathrooms: 3,
+    squareFootage: 1600,
+    maxOccupants: 6,
+    furnishing: "furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: false,
+    listingActorType: "firm",
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "Labone 2-Bed Apartment with Balcony",
+    description:
+      "Bright furnished apartment in Labone with a private balcony, prepaid meter, and secure parking. Ideal for professionals who want Accra access without an agent markup.",
+    propertyType: "apartment",
+    pricePerMonth: 3200,
+    advancePeriod: "six_months",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Labone",
+    digitalAddressGhanapost: "GA-154-2208",
+    latitude: 5.5665,
+    longitude: -0.1705,
+    bedrooms: 2,
+    bathrooms: 2,
+    squareFootage: 1100,
+    maxOccupants: 4,
+    furnishing: "furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: true,
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasSolar: false,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=1200&h=800&fit=crop",
+        category: "balcony",
+      },
+    ],
+  },
+  {
+    title: "Ridge Contemporary 1-Bed Apartment",
+    description:
+      "Compact contemporary one-bedroom near Ridge Hospital. Part furnished, quiet compound, and reliable polytank water for long-stay tenants.",
+    propertyType: "apartment",
+    pricePerMonth: 2400,
+    advancePeriod: "six_months",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Ridge",
+    digitalAddressGhanapost: "GA-090-4412",
+    latitude: 5.5602,
+    longitude: -0.1968,
+    bedrooms: 1,
+    bathrooms: 1,
+    squareFootage: 720,
+    maxOccupants: 2,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: true,
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: false,
+      hasSolar: false,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: false,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "Dansoman Building Society Terrace House",
+    description:
+      "3-bedroom terrace listed by Greater Accra Building Society. Accountable lettings with clear deposit rules when the tenancy ends.",
+    propertyType: "house",
+    pricePerMonth: 2100,
+    advancePeriod: "six_months",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Dansoman",
+    latitude: 5.543,
+    longitude: -0.265,
+    bedrooms: 3,
+    bathrooms: 2,
+    squareFootage: 1350,
+    maxOccupants: 5,
+    furnishing: "semi_furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: false,
+    listingActorType: "firm",
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: false,
+      hasAirConditioning: false,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop",
+        category: "exterior",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=800&fit=crop",
+        category: "living_room",
       },
     ],
   },
@@ -319,6 +635,26 @@ async function main() {
     },
   });
 
+  const agent = await prisma.user.upsert({
+    where: { email: "agent@sheltergh.local" },
+    update: {
+      role: "agent",
+      idVerificationStatus: "verified",
+      ghanaCardNumber: "GHA-333333333-3",
+    },
+    create: {
+      email: "agent@sheltergh.local",
+      phoneNumber: "+233244998877",
+      fullName: "Kojo Boateng",
+      passwordHash,
+      role: "agent",
+      idVerificationStatus: "verified",
+      ghanaCardNumber: "GHA-333333333-3",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop",
+    },
+  });
+
   await prisma.user.upsert({
     where: { email: "admin@sheltergh.local" },
     update: {
@@ -335,47 +671,140 @@ async function main() {
     },
   });
 
-  const existingCount = await prisma.property.count();
-  if (existingCount === 0) {
-    for (let i = 0; i < listings.length; i++) {
-      const listing = listings[i];
-      const landlordId = i % 2 === 0 ? kwame.id : ama.id;
-      await prisma.property.create({
-        data: {
-          landlordId,
-          title: listing.title,
-          description: listing.description,
-          propertyType: listing.propertyType,
-          pricePerMonth: listing.pricePerMonth,
-          advancePeriod: listing.advancePeriod,
-          securityDeposit: listing.pricePerMonth,
-          region: listing.region,
-          cityTown: listing.cityTown,
-          neighborhood: listing.neighborhood,
-          digitalAddressGhanapost: listing.digitalAddressGhanapost,
-          latitude: listing.latitude,
-          longitude: listing.longitude,
-          locationVerified: true,
-          gpsCapturedAt: new Date(),
-          bedrooms: listing.bedrooms,
-          bathrooms: listing.bathrooms,
-          squareFootage: listing.squareFootage,
-          isDirectOwnerVerified: listing.isDirectOwnerVerified,
-          amenities: { create: listing.amenities },
-          media: {
-            create: listing.media.map((m, idx) => ({
-              mediaUrl: m.url,
-              mediaType: "image",
-              category: m.category,
-              displayOrder: idx,
-            })),
+  const firm = await prisma.user.upsert({
+    where: { email: "firm@sheltergh.local" },
+    update: {
+      role: "firm",
+      companyName: "Accra Homes Ltd",
+      idVerificationStatus: "verified",
+      ghanaCardNumber: "GHA-444444444-4",
+    },
+    create: {
+      email: "firm@sheltergh.local",
+      phoneNumber: "+233302556677",
+      fullName: "Abena Owusu",
+      companyName: "Accra Homes Ltd",
+      passwordHash,
+      role: "firm",
+      idVerificationStatus: "verified",
+      ghanaCardNumber: "GHA-444444444-4",
+      avatarUrl:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop",
+    },
+  });
+
+  async function createListing(
+    listing: SeedListing,
+    landlordId: string,
+    actorType: "owner" | "agent" | "firm"
+  ) {
+    await prisma.property.create({
+      data: {
+        landlordId,
+        listingActorType: actorType,
+        title: listing.title,
+        description: listing.description,
+        propertyType: listing.propertyType,
+        pricePerMonth: listing.pricePerMonth,
+        advancePeriod: listing.advancePeriod,
+        securityDeposit: listing.pricePerMonth,
+        region: listing.region,
+        cityTown: listing.cityTown,
+        neighborhood: listing.neighborhood,
+        digitalAddressGhanapost: listing.digitalAddressGhanapost,
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        locationVerified: true,
+        gpsCapturedAt: new Date(),
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        squareFootage: listing.squareFootage,
+        maxOccupants: listing.maxOccupants,
+        stayDuration:
+          listing.stayDuration ??
+          (listing.propertyType === "short_stay" ? "short_stay" : "long_stay"),
+        furnishing: listing.furnishing,
+        smokingAllowed: listing.smokingAllowed,
+        isDirectOwnerVerified:
+          actorType === "owner" ? listing.isDirectOwnerVerified : false,
+        amenities: {
+          create: {
+            ...listing.amenities,
+            hasSolar: listing.amenities.hasSolar ?? false,
           },
         },
-      });
+        media: {
+          create: listing.media.map((m, idx) => ({
+            mediaUrl: m.url,
+            mediaType: "image",
+            category: m.category,
+            displayOrder: idx,
+          })),
+        },
+      },
+    });
+  }
+
+  const existingCount = await prisma.property.count();
+  if (existingCount === 0) {
+    let ownerIndex = 0;
+    for (const listing of listings) {
+      const actorType = listing.listingActorType ?? "owner";
+      const landlordId =
+        actorType === "agent"
+          ? agent.id
+          : actorType === "firm"
+            ? firm.id
+            : ownerIndex++ % 2 === 0
+              ? kwame.id
+              : ama.id;
+      await createListing(listing, landlordId, actorType);
     }
     console.log("Seeded demo listings");
   } else {
-    console.log(`Seed skipped listings (${existingCount} already exist)`);
+    for (const listing of listings) {
+      const actorType = listing.listingActorType ?? "owner";
+      const hostId =
+        actorType === "agent"
+          ? agent.id
+          : actorType === "firm"
+            ? firm.id
+            : undefined;
+      const existing = await prisma.property.findFirst({
+        where: { title: listing.title },
+        select: { id: true },
+      });
+      if (existing) {
+        await prisma.property.update({
+          where: { id: existing.id },
+          data: {
+            maxOccupants: listing.maxOccupants,
+            stayDuration:
+              listing.stayDuration ??
+              (listing.propertyType === "short_stay"
+                ? "short_stay"
+                : "long_stay"),
+            furnishing: listing.furnishing,
+            smokingAllowed: listing.smokingAllowed,
+            securityDeposit: listing.pricePerMonth,
+            listingActorType: actorType,
+            landlordId: hostId,
+            isDirectOwnerVerified:
+              actorType === "owner" ? listing.isDirectOwnerVerified : false,
+          },
+        });
+      } else {
+        await createListing(
+          listing,
+          hostId ?? kwame.id,
+          actorType
+        );
+        console.log(`Seeded new listing: ${listing.title}`);
+      }
+    }
+    console.log(
+      `Seed synced ${listings.length} listings (${await prisma.property.count()} total)`
+    );
   }
 
   const experienceCount = await prisma.experience.count();
@@ -569,7 +998,9 @@ async function main() {
     console.log(`Seed skipped experiences (${experienceCount} already exist)`);
   }
 
-  console.log("Demo login: kwame@sheltergh.local / Password123!");
+  console.log("Demo login: kwame@sheltergh.local / Password123! (landlord)");
+  console.log("Demo login: agent@sheltergh.local / Password123! (agent)");
+  console.log("Demo login: firm@sheltergh.local / Password123! (firm)");
   console.log("Demo login: renter@sheltergh.local / Password123!");
   console.log("Demo login: admin@sheltergh.local / Password123!");
 }

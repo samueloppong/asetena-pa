@@ -8,13 +8,30 @@ export async function PATCH(request: Request) {
 
   const body = await request.json();
   const role = body.role;
-  if (role !== "renter" && role !== "landlord") {
+  if (
+    role !== "renter" &&
+    role !== "landlord" &&
+    role !== "agent" &&
+    role !== "firm"
+  ) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
+
+  const companyName =
+    typeof body.companyName === "string" ? body.companyName.trim() : "";
+  if (role === "firm" && companyName.length < 2) {
+    return NextResponse.json(
+      { error: "Company name is required for firms" },
+      { status: 400 }
+    );
   }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: { role },
+    data: {
+      role,
+      ...(role === "firm" ? { companyName } : {}),
+    },
   });
 
   return NextResponse.json({

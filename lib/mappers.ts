@@ -23,6 +23,7 @@ export function mapUser(user: User): AppUser {
     email: user.email,
     phone_number: user.phoneNumber,
     full_name: user.fullName,
+    company_name: user.companyName ?? undefined,
     role: user.role,
     ghana_card_number: user.ghanaCardNumber ?? undefined,
     id_verification_status: user.idVerificationStatus,
@@ -59,8 +60,10 @@ export function mapProperty(property: PropertyWithRelations): AppProperty {
     bathrooms: property.bathrooms,
     square_footage: property.squareFootage ?? undefined,
     is_direct_owner_verified: property.isDirectOwnerVerified,
+    listing_actor_type: property.listingActorType,
     ownership_status: property.ownershipStatus,
     availability: property.availability,
+    stay_duration: property.stayDuration,
     furnishing: property.furnishing,
     available_from: property.availableFrom
       ? property.availableFrom.toISOString().slice(0, 10)
@@ -85,6 +88,7 @@ export function mapProperty(property: PropertyWithRelations): AppProperty {
       ? {
           has_polytank_water: property.amenities.hasPolytankWater,
           has_standby_generator: property.amenities.hasStandbyGenerator,
+          has_solar: property.amenities.hasSolar,
           has_air_conditioning: property.amenities.hasAirConditioning,
           is_walled_and_gated: property.amenities.isWalledAndGated,
           has_self_meter: property.amenities.hasSelfMeter,
@@ -93,6 +97,7 @@ export function mapProperty(property: PropertyWithRelations): AppProperty {
       : {
           has_polytank_water: false,
           has_standby_generator: false,
+          has_solar: false,
           has_air_conditioning: false,
           is_walled_and_gated: false,
           has_self_meter: true,

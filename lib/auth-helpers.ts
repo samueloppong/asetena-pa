@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { canListProperties } from "@/lib/listing-actor";
 import { NextResponse } from "next/server";
 
 export async function requireSession() {
@@ -10,17 +11,15 @@ export async function requireSession() {
   return { session, error: null };
 }
 
+/** Landlord or letting agent (or admin) — anyone accountable for a listing. */
 export async function requireLandlord() {
   const result = await requireSession();
   if (result.error || !result.session) return result;
-  if (
-    result.session.user.role !== "landlord" &&
-    result.session.user.role !== "admin"
-  ) {
+  if (!canListProperties(result.session.user.role)) {
     return {
       session: null,
       error: NextResponse.json(
-        { error: "Landlord account required to list properties" },
+        { error: "Landlord or agent account required to list properties" },
         { status: 403 }
       ),
     };

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,17 +35,6 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-md space-y-4 px-4 py-8">
-      <div className="space-y-3">
-        <BrandLogo />
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-brand">
-            Sign in
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Demo: renter@sheltergh.local / Password123!
-          </p>
-        </div>
-      </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

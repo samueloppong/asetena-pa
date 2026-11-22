@@ -5,11 +5,13 @@ import {
   ArrowLeft,
   Bath,
   BedDouble,
+  CigaretteOff,
   MapPin,
   Ruler,
   ShieldCheck,
   Sofa,
   Star,
+  Users,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -22,6 +24,7 @@ import { ShareListingButton } from "@/components/property/ShareListingButton";
 import { StayReviewForm } from "@/components/property/StayReviewForm";
 import { FavoriteButton } from "@/components/property/FavoriteButton";
 import { MoveInCostCalculator } from "@/components/property/MoveInCostCalculator";
+import { FurnishingPartners } from "@/components/property/FurnishingPartners";
 import { NeighborhoodInsights } from "@/components/property/NeighborhoodInsights";
 import { ReportListingButton } from "@/components/property/ReportListingButton";
 import { PeopleWatching } from "@/components/property/PeopleWatching";
@@ -32,16 +35,13 @@ import { landlordReplyLabel } from "@/lib/reply-time";
 import { isJustAdded } from "@/lib/just-added";
 import {
   ADVANCE_LABELS,
+  FURNISHING_LABELS,
   formatGhs,
   formatLocation,
+  maxPersonsLabel,
   PROPERTY_TYPE_LABELS,
+  smokingRuleLabel,
 } from "@/lib/format";
-
-const FURNISHING_LABEL = {
-  unfurnished: "Unfurnished",
-  semi_furnished: "Semi-furnished",
-  furnished: "Furnished",
-} as const;
 
 export const dynamic = "force-dynamic";
 
@@ -107,12 +107,21 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               : ""}
           </p>
           {property.latitude != null && property.longitude != null ? (
-            <a href="#where" className="flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-2 hover:underline">
-              <MapPin className="size-4 shrink-0 text-primary" />
-              {formatLocation(property.neighborhood, property.city_town)}
-              {property.region ? `, ${property.region}` : ""}
-              {property.digital_address_ghanapost ? ` · ${property.digital_address_ghanapost}` : ""}
-            </a>
+            <div className="space-y-1">
+              <a href="#where" className="flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-2 hover:underline">
+                <MapPin className="size-4 shrink-0 text-primary" />
+                {formatLocation(property.neighborhood, property.city_town)}
+                {property.region ? `, ${property.region}` : ""}
+                {property.digital_address_ghanapost ? ` · ${property.digital_address_ghanapost}` : ""}
+              </a>
+              <p className="pl-5 font-mono text-xs text-muted-foreground">
+                GPS {property.latitude.toFixed(6)}, {property.longitude.toFixed(6)}
+                {" · "}
+                <a href="#where" className="font-sans font-medium text-primary underline-offset-2 hover:underline">
+                  Check on map
+                </a>
+              </p>
+            </div>
           ) : (
             <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
               <MapPin className="size-4 shrink-0 text-primary" />
@@ -158,10 +167,25 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           <Spec icon={<BedDouble className="size-4" />} label={`${property.bedrooms} Beds`} />
           <Spec icon={<Bath className="size-4" />} label={`${property.bathrooms} Baths`} />
-          <Spec icon={<Sofa className="size-4" />} label={FURNISHING_LABEL[property.furnishing]} />
+          <Spec
+            icon={<Users className="size-4" />}
+            label={maxPersonsLabel(property.max_occupants, property.bedrooms)}
+          />
+          <Spec
+            icon={<Sofa className="size-4" />}
+            label={
+              property.stay_duration === "short_stay" && property.furnishing === "furnished"
+                ? "Fully furnished"
+                : FURNISHING_LABELS[property.furnishing]
+            }
+          />
+          <Spec
+            icon={<CigaretteOff className="size-4" />}
+            label={smokingRuleLabel(property.smoking_allowed)}
+          />
           <Spec
             icon={<Ruler className="size-4" />}
             label={
@@ -188,12 +212,29 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           )}
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-foreground">
-              Host: {property.landlord.full_name}
+              {property.listing_actor_type === "firm"
+                ? property.landlord.company_name || "Firm"
+                : property.listing_actor_type === "agent"
+                  ? `Agent: ${property.landlord.full_name}`
+                  : `Landlord: ${property.landlord.full_name}`}
             </p>
+            {property.listing_actor_type === "firm" ? (
+              <p className="text-sm text-foreground">
+                Authorised contact: {property.landlord.full_name}
+              </p>
+            ) : null}
             <p className="text-xs text-muted-foreground">
-              {property.landlord.id_verification_status === "verified"
-                ? "ID verified landlord"
-                : "Verification pending"}
+              {property.listing_actor_type === "firm"
+                ? property.landlord.id_verification_status === "verified"
+                  ? "ID verified firm contact"
+                  : "Firm verification pending"
+                : property.listing_actor_type === "agent"
+                  ? property.landlord.id_verification_status === "verified"
+                    ? "ID verified letting agent"
+                    : "Agent verification pending"
+                  : property.landlord.id_verification_status === "verified"
+                    ? "ID verified landlord"
+                    : "Verification pending"}
               {replyLabel ? ` · ${replyLabel}` : ""}
             </p>
             {landlordTrust ? (
@@ -205,12 +246,22 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
             ) : null}
           </div>
-          {property.is_direct_owner_verified && (
+          {property.listing_actor_type === "agent" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-verified">
               <ShieldCheck className="size-3.5" />
-              Verified
+              Verified agent
             </span>
-          )}
+          ) : property.listing_actor_type === "firm" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-verified">
+              <ShieldCheck className="size-3.5" />
+              Verified firm
+            </span>
+          ) : property.is_direct_owner_verified ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-verified">
+              <ShieldCheck className="size-3.5" />
+              Verified owner
+            </span>
+          ) : null}
         </div>
 
         <section className="space-y-3">
@@ -218,34 +269,58 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <AmenitiesGrid amenities={property.amenities} />
         </section>
 
-        <section className="space-y-2">
-          <h2 className="text-base font-bold text-brand">Description</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {property.description}
-          </p>
+        <section className="space-y-3">
+          <div
+            className="border border-gold/20 bg-[#fffff7] px-4 py-4 [border-radius:unset]"
+            style={{ borderRadius: "unset" }}
+          >
+            <h2 className="text-[10px] font-bold tracking-[0.14em] text-gold uppercase">
+              Description
+            </h2>
+            <p className="mt-2 text-sm leading-[1.6] text-[#3a3428]">
+              {property.description}
+            </p>
+          </div>
         </section>
 
         <section className="space-y-2">
           <h2 className="text-base font-bold text-brand">House rules and bills</h2>
           <p className="text-sm text-muted-foreground">
-            {property.furnishing.replaceAll("_", " ")}
+            {FURNISHING_LABELS[property.furnishing]}
+            {property.stay_duration === "short_stay" ? " · short stay" : " · long stay"}
             {property.available_from ? ` · free from ${property.available_from}` : " · available now"}
-            {property.max_occupants ? ` · up to ${property.max_occupants} people` : ""}
+            {" · "}
+            {maxPersonsLabel(property.max_occupants, property.bedrooms)}
           </p>
           <p className="text-sm text-muted-foreground">
             ECG {property.bills_electricity} · water {property.bills_water} · internet {property.bills_internet}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Pets {property.pets_allowed ? "allowed" : "not allowed"} · smoking{" "}
-            {property.smoking_allowed ? "allowed" : "not allowed"}
-            {property.quiet_hours ? ` · quiet hours ${property.quiet_hours}` : ""}
+          <p className="text-sm font-medium text-foreground">
+            {smokingRuleLabel(property.smoking_allowed)}
+            <span className="font-normal text-muted-foreground">
+              {" · "}
+              Pets {property.pets_allowed ? "allowed" : "not allowed"}
+              {property.quiet_hours ? ` · quiet hours ${property.quiet_hours}` : ""}
+            </span>
           </p>
+          {property.security_deposit > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Security deposit {formatGhs(property.security_deposit)} is held and can be charged when you leave or your stay ends if there is damage or unpaid bills.
+            </p>
+          ) : null}
           {property.house_rules ? (
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
               {property.house_rules}
             </p>
           ) : null}
         </section>
+
+        <FurnishingPartners
+          furnishing={property.furnishing}
+          region={property.region}
+          cityTown={property.city_town}
+          neighborhood={property.neighborhood}
+        />
 
         <MoveInCostCalculator
           pricePerMonth={property.price_per_month}
@@ -258,6 +333,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             latitude={property.latitude}
             longitude={property.longitude}
             label={property.title}
+            verified={Boolean(property.location_verified)}
           />
         )}
 

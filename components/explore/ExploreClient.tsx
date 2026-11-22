@@ -6,6 +6,7 @@ import { HeroSection, type HeroHome } from "@/components/home/HeroSection";
 import { PropertySearch } from "@/components/home/PropertySearch";
 import { Footer } from "@/components/layout/Footer";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { FieldSelect } from "@/components/ui/FieldSelect";
 import { formatPricePerMonth } from "@/lib/format";
 import { FilterBadges } from "@/components/search/FilterBadges";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
@@ -198,12 +199,21 @@ export function ExploreClient({
     return list;
   }, [properties, sort]);
 
-  const featured = properties.filter(
-    (p) =>
-      p.is_direct_owner_verified &&
-      (p.neighborhood === "Cantonments" || p.neighborhood === "East Legon") &&
-      p.price_per_month >= 3500
-  );
+  const featured = properties
+    .filter(
+      (p) =>
+        p.is_active &&
+        p.availability === "available" &&
+        p.price_per_month >= 3500 &&
+        (p.property_type === "apartment" ||
+          p.property_type === "house" ||
+          p.property_type === "short_stay") &&
+        (p.neighborhood === "Cantonments" ||
+          p.neighborhood === "East Legon" ||
+          p.neighborhood === "Airport Residential" ||
+          p.neighborhood === "Osu")
+    )
+    .sort((a, b) => b.price_per_month - a.price_per_month);
 
   function clearFilters() {
     setQuery("");
@@ -245,18 +255,27 @@ export function ExploreClient({
         <FilterBadges active={filter} onChange={setFilter} />
 
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none overscroll-x-contain sm:mx-0 sm:px-0">
-          <select
-            value={furnishing}
-            onChange={(e) =>
-              setFurnishing(e.target.value as SavedSearch["furnishing"])
-            }
-            className="h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm"
-          >
-            <option value="">Any furnishing</option>
-            <option value="unfurnished">Unfurnished</option>
-            <option value="semi_furnished">Semi-furnished</option>
-            <option value="furnished">Furnished</option>
-          </select>
+          {(
+            [
+              ["", "Any furnishing"],
+              ["furnished", "Furnished"],
+              ["semi_furnished", "Part furnished"],
+              ["unfurnished", "Unfurnished"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value || "any"}
+              type="button"
+              onClick={() => setFurnishing(value)}
+              className={
+                furnishing === value
+                  ? "h-11 shrink-0 rounded-[0.75rem] border border-primary bg-accent px-3 text-sm font-semibold text-foreground"
+                  : "h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm text-foreground"
+              }
+            >
+              {label}
+            </button>
+          ))}
           <input
             type="date"
             value={availableBy}
@@ -314,17 +333,20 @@ export function ExploreClient({
                 {!loading ? ` ${sortedProperties.length} matches.` : null}
               </p>
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Sort</span>
-              <select
+            <label className="flex min-w-[12rem] items-center gap-2 text-sm">
+              <span className="shrink-0 text-muted-foreground">Sort</span>
+              <FieldSelect
+                aria-label="Sort listings"
+                size="sm"
                 value={sort}
-                onChange={(e) => setSort(e.target.value as SortMode)}
-                className="h-10 rounded-[0.75rem] border border-border bg-white px-3 text-sm"
-              >
-                <option value="latest">Latest</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-              </select>
+                triggerClassName="bg-white"
+                options={[
+                  { value: "latest", label: "Latest" },
+                  { value: "price_asc", label: "Price: Low to High" },
+                  { value: "price_desc", label: "Price: High to Low" },
+                ]}
+                onValueChange={(value) => setSort(value as SortMode)}
+              />
             </label>
           </div>
 
@@ -351,8 +373,8 @@ export function ExploreClient({
                 Premium Accra neighbourhoods
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-5 min-[640px]:grid-cols-2">
-              {featured.slice(0, 2).map((property) => (
+            <div className="grid grid-cols-1 gap-5 min-[640px]:grid-cols-2 lg:grid-cols-3">
+              {featured.slice(0, 3).map((property) => (
                 <PropertyCard
                   key={`feat-${property.id}`}
                   property={property}

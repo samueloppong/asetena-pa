@@ -10,7 +10,16 @@ datasource db {
 enum UserRole {
   renter
   landlord
+  agent
+  firm
   admin
+}
+
+/// Who is accountable for the listing on the platform.
+enum ListingActorType {
+  owner
+  agent
+  firm
 }
 
 enum VerificationStatus {
@@ -46,6 +55,12 @@ enum Furnishing {
   unfurnished
   semi_furnished
   furnished
+}
+
+/// How long guests/tenants typically stay — independent of home type.
+enum StayDuration {
+  long_stay
+  short_stay
 }
 
 enum BillPayer {
@@ -100,6 +115,8 @@ model User {
   email                String             @unique @db.VarChar(255)
   phoneNumber          String             @unique @map("phone_number") @db.VarChar(20)
   fullName             String             @map("full_name") @db.VarChar(100)
+  /// Legal / trading name for estate firms and building societies.
+  companyName          String?            @map("company_name") @db.VarChar(150)
   passwordHash         String             @map("password_hash")
   role                 UserRole           @default(renter)
   ghanaCardNumber      String?            @unique @map("ghana_card_number") @db.VarChar(20)
@@ -175,9 +192,11 @@ model Property {
   bathrooms              Int
   squareFootage          Int?             @map("square_footage")
   isDirectOwnerVerified  Boolean          @default(false) @map("is_direct_owner_verified")
+  listingActorType       ListingActorType @default(owner) @map("listing_actor_type")
   landTitleDocumentUrl   String?          @map("land_title_document_url")
   ownershipStatus        OwnershipReviewStatus @default(none) @map("ownership_status")
   availability           ListingAvailability @default(available)
+  stayDuration           StayDuration     @default(long_stay) @map("stay_duration")
   furnishing             Furnishing       @default(unfurnished)
   availableFrom          DateTime?        @map("available_from") @db.Date
   billsElectricity       BillPayer        @default(tenant) @map("bills_electricity")
@@ -212,6 +231,7 @@ model PropertyAmenities {
   propertyId            String  @id @map("property_id") @db.Uuid
   hasPolytankWater      Boolean @default(false) @map("has_polytank_water")
   hasStandbyGenerator   Boolean @default(false) @map("has_standby_generator")
+  hasSolar              Boolean @default(false) @map("has_solar")
   hasAirConditioning    Boolean @default(false) @map("has_air_conditioning")
   isWalledAndGated      Boolean @default(false) @map("is_walled_and_gated")
   hasSelfMeter          Boolean @default(true) @map("has_self_meter")

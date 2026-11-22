@@ -4,6 +4,7 @@ import {
   Fence,
   Gauge,
   Snowflake,
+  Sun,
   Zap,
 } from "lucide-react";
 import type { PropertyAmenities } from "@/lib/types";
@@ -16,6 +17,7 @@ const items: {
 }[] = [
   { key: "has_polytank_water", label: "24/7 Water (Polytank)", icon: Droplets },
   { key: "has_standby_generator", label: "Standby Generator", icon: Zap },
+  { key: "has_solar", label: "Solar power", icon: Sun },
   { key: "has_air_conditioning", label: "Air Conditioning", icon: Snowflake },
   { key: "is_walled_and_gated", label: "Walled & Gated", icon: Fence },
   { key: "has_self_meter", label: "Self ECG Meter", icon: Gauge },

@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { Property } from "@/lib/types";
 import {
-  ADVANCE_LABELS,
   formatLocation,
   formatPricePerMonth,
   PROPERTY_TYPE_LABELS,
@@ -16,13 +15,8 @@ import {
 import { fetchFavorites, toggleFavoriteApi } from "@/lib/api-client";
 import { isJustAdded } from "@/lib/just-added";
 import { cn } from "@/lib/utils";
+import { ListingFactsRow } from "@/components/property/ListingFactsRow";
 import { PropertyImage } from "@/components/property/PropertyImage";
-
-const FURNISHING_LABEL = {
-  unfurnished: "Unfurnished",
-  semi_furnished: "Semi-furnished",
-  furnished: "Furnished",
-} as const;
 
 interface PropertyCardProps {
   property: Property;
@@ -118,12 +112,22 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
               Just added
             </span>
           )}
-          {property.is_direct_owner_verified && (
+          {property.listing_actor_type === "agent" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-verified px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+              <ShieldCheck className="size-3" />
+              Verified agent
+            </span>
+          ) : property.listing_actor_type === "firm" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-verified px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+              <ShieldCheck className="size-3" />
+              Verified firm
+            </span>
+          ) : property.is_direct_owner_verified ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-verified px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
               <ShieldCheck className="size-3" />
               Verified Owner
             </span>
-          )}
+          ) : null}
         </div>
         <button
           type="button"
@@ -186,9 +190,6 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
             {property.review_count > 0 ? property.rating.toFixed(1) : "New"}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {ADVANCE_LABELS[property.advance_period]}
-        </p>
         <h3 className="line-clamp-1 font-heading text-[0.95rem] font-semibold leading-snug text-foreground sm:text-base">
           {property.title}
         </h3>
@@ -196,20 +197,37 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
           <MapPin className="size-3.5 shrink-0 text-gold" />
           <span className="truncate">
             {formatLocation(property.neighborhood, property.city_town)}
+            {" · "}
+            {PROPERTY_TYPE_LABELS[property.property_type]}
           </span>
         </p>
-        <p className="text-xs text-muted-foreground">
-          {`${property.bedrooms} ${property.bedrooms === 1 ? "bed" : "beds"} · ${property.bathrooms} ${property.bathrooms === 1 ? "bath" : "baths"} · ${PROPERTY_TYPE_LABELS[property.property_type]} · ${FURNISHING_LABEL[property.furnishing]}`}
-        </p>
+        <ListingFactsRow
+          compact={compact}
+          bedrooms={property.bedrooms}
+          bathrooms={property.bathrooms}
+          maxOccupants={property.max_occupants}
+          smokingAllowed={property.smoking_allowed}
+          furnishing={property.furnishing}
+          stayDuration={property.stay_duration}
+          advancePeriod={property.advance_period}
+          securityDeposit={property.security_deposit}
+          hasGenerator={property.amenities.has_standby_generator}
+          hasSolar={property.amenities.has_solar}
+        />
         {!compact && (
-          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            {property.description}
-          </p>
-        )}
-        {!compact && (
-          <span className="mt-auto pt-2 text-sm font-semibold text-foreground underline-offset-2 group-hover:underline">
-            View Property
-          </span>
+          <div className="-mx-4 mt-2">
+            <div
+              className="border-y border-gold/20 bg-[#fffff7] px-4 py-3 [border-radius:unset]"
+              style={{ borderRadius: "unset" }}
+            >
+              <p className="mb-1.5 text-[10px] font-bold tracking-[0.14em] text-gold uppercase">
+                Description
+              </p>
+              <p className="line-clamp-3 text-sm leading-[1.55] text-[#3a3428]">
+                {property.description}
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </Link>

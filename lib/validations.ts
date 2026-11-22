@@ -1,16 +1,27 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
-  email: z.string().email(),
-  phoneNumber: z
-    .string()
-    .min(9)
-    .max(20)
-    .regex(/^\+?[0-9]+$/, "Use a valid phone number"),
-  fullName: z.string().min(2).max(100),
-  password: z.string().min(8).max(100),
-  role: z.enum(["renter", "landlord"]).default("renter"),
-});
+export const registerSchema = z
+  .object({
+    email: z.string().email(),
+    phoneNumber: z
+      .string()
+      .min(9)
+      .max(20)
+      .regex(/^\+?[0-9]+$/, "Use a valid phone number"),
+    fullName: z.string().min(2).max(100),
+    companyName: z.string().min(2).max(150).optional().nullable(),
+    password: z.string().min(8).max(100),
+    role: z.enum(["renter", "landlord", "agent", "firm"]).default("renter"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.role === "firm" && !data.companyName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Company name is required for firms",
+        path: ["companyName"],
+      });
+    }
+  });
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -44,6 +55,7 @@ export const propertyCreateSchema = z.object({
     .object({
       hasPolytankWater: z.boolean().default(false),
       hasStandbyGenerator: z.boolean().default(false),
+      hasSolar: z.boolean().default(false),
       hasAirConditioning: z.boolean().default(false),
       isWalledAndGated: z.boolean().default(false),
       hasSelfMeter: z.boolean().default(true),
@@ -52,11 +64,13 @@ export const propertyCreateSchema = z.object({
     .default({
       hasPolytankWater: false,
       hasStandbyGenerator: false,
+      hasSolar: false,
       hasAirConditioning: false,
       isWalledAndGated: false,
       hasSelfMeter: true,
       hasParkingSpace: false,
     }),
+  stayDuration: z.enum(["long_stay", "short_stay"]).default("long_stay"),
   furnishing: z.enum(["unfurnished", "semi_furnished", "furnished"]).default("unfurnished"),
   availableFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   billsElectricity: z.enum(["tenant", "landlord", "shared"]).default("tenant"),
@@ -64,7 +78,9 @@ export const propertyCreateSchema = z.object({
   billsInternet: z.enum(["tenant", "landlord", "shared"]).default("tenant"),
   petsAllowed: z.boolean().default(false),
   smokingAllowed: z.boolean().default(false),
-  maxOccupants: z.coerce.number().int().positive().optional().nullable(),
+  maxOccupants: z.coerce.number().int().positive({
+    message: "Enter the maximum number of persons who can stay",
+  }),
   quietHours: z.string().max(80).optional().nullable(),
   houseRules: z.string().max(1000).optional().nullable(),
   accessInstructions: z.string().max(1000).optional().nullable(),
@@ -204,6 +220,7 @@ export const propertyUpdateSchema = z
     bedrooms: z.coerce.number().int().min(0).optional(),
     bathrooms: z.coerce.number().int().min(0).optional(),
     availability: z.enum(["available", "paused", "held", "rented"]).optional(),
+    stayDuration: z.enum(["long_stay", "short_stay"]).optional(),
     furnishing: z.enum(["unfurnished", "semi_furnished", "furnished"]).optional(),
     availableFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
     billsElectricity: z.enum(["tenant", "landlord", "shared"]).optional(),
@@ -219,6 +236,7 @@ export const propertyUpdateSchema = z
       .object({
         hasPolytankWater: z.boolean(),
         hasStandbyGenerator: z.boolean(),
+        hasSolar: z.boolean(),
         hasAirConditioning: z.boolean(),
         isWalledAndGated: z.boolean(),
         hasSelfMeter: z.boolean(),

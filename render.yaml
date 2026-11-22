@@ -14,7 +14,8 @@ services:
     plan: free
     region: oregon
     branch: master
-    buildCommand: npm ci && npx prisma generate && npm run build
+    # --include=dev: NODE_ENV=production would otherwise omit Tailwind/PostCSS build deps
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npx tsx prisma/seed.ts && npm run start
     healthCheckPath: /
     envVars:

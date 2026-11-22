@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { FieldSelect } from "@/components/ui/FieldSelect";
 import {
   searchGhanaLocations,
   type LocationSuggestion,
@@ -31,6 +32,14 @@ const TYPE_OPTIONS: { value: FilterChip; label: string }[] = [
   { value: "house", label: "Houses" },
   { value: "chamber_and_hall", label: "Chamber & Hall" },
   { value: "short_stay", label: "Short Stays" },
+];
+
+const BED_OPTIONS = [
+  { value: "any", label: "Any" },
+  { value: "1", label: "1+" },
+  { value: "2", label: "2+" },
+  { value: "3", label: "3+" },
+  { value: "4", label: "4+" },
 ];
 
 export function PropertySearch({
@@ -121,36 +130,28 @@ export function PropertySearch({
             <span className="mb-1.5 block text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
               Property Type
             </span>
-            <select
+            <FieldSelect
+              aria-label="Property type"
               value={values.filter}
-              onChange={(e) =>
-                onChange({ filter: e.target.value as FilterChip })
+              options={TYPE_OPTIONS}
+              onValueChange={(filter) =>
+                onChange({ filter: filter as FilterChip })
               }
-              className="h-12 w-full rounded-[0.75rem] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
-            >
-              {TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            />
           </label>
 
           <label className="block min-w-0">
             <span className="mb-1.5 block text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
               Bedrooms
             </span>
-            <select
-              value={values.minBeds}
-              onChange={(e) => onChange({ minBeds: e.target.value })}
-              className="h-12 w-full rounded-[0.75rem] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
-            >
-              <option value="">Any</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-            </select>
+            <FieldSelect
+              aria-label="Minimum bedrooms"
+              value={values.minBeds || "any"}
+              options={BED_OPTIONS}
+              onValueChange={(minBeds) =>
+                onChange({ minBeds: minBeds === "any" ? "" : minBeds })
+              }
+            />
           </label>
 
           <label className="block min-w-0">
@@ -183,16 +184,21 @@ export function PropertySearch({
             />
           </label>
 
-          <button
-            type="button"
-            onClick={onSearch}
-            className={cn(
-              "btn-gold inline-flex h-12 items-center justify-center gap-2 rounded-[0.75rem] px-5 text-sm font-bold transition lg:mt-0"
-            )}
-          >
-            <Search className="size-4" />
-            Search
-          </button>
+          <div className="flex min-w-0 flex-col">
+            <span className="mb-1.5 block text-[11px] font-semibold tracking-wide text-transparent uppercase select-none" aria-hidden>
+              Search
+            </span>
+            <button
+              type="button"
+              onClick={onSearch}
+              className={cn(
+                "btn-gold inline-flex h-12 w-full items-center justify-center gap-2 rounded-[0.75rem] px-5 text-sm font-bold transition"
+              )}
+            >
+              <Search className="size-4" />
+              Search
+            </button>
+          </div>
         </div>
       </div>
     </PageContainer>

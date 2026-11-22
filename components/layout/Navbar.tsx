@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { MobileNavDrawer } from "@/components/layout/MobileNavDrawer";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { canListProperties } from "@/lib/listing-actor";
 import { cn } from "@/lib/utils";
 
 const centerLinks = [
@@ -17,6 +19,9 @@ const centerLinks = [
 
 export function Navbar({ className }: { className?: string }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const signedIn = status === "authenticated" && Boolean(session?.user);
+  const canList = canListProperties(session?.user?.role);
 
   return (
     <>
@@ -52,18 +57,41 @@ export function Navbar({ className }: { className?: string }) {
             >
               List Your Property
             </Link>
-            <Link
-              href="/login"
-              className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="btn-gold inline-flex h-11 items-center rounded-[0.7rem] px-4 text-sm font-semibold transition"
-            >
-              Get Started
-            </Link>
+            {status === "loading" ? (
+              <span className="h-11 w-24 animate-pulse rounded-[0.7rem] bg-secondary" />
+            ) : signedIn ? (
+              <>
+                {canList ? (
+                  <Link
+                    href="/mine"
+                    className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                  >
+                    My listings
+                  </Link>
+                ) : null}
+                <Link
+                  href="/profile"
+                  className="btn-gold inline-flex h-11 max-w-[10rem] items-center truncate rounded-[0.7rem] px-4 text-sm font-semibold transition"
+                >
+                  {session.user.name?.split(" ")[0] || "Profile"}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="btn-gold inline-flex h-11 items-center rounded-[0.7rem] px-4 text-sm font-semibold transition"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </PageContainer>
       </header>

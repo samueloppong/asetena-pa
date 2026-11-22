@@ -232,6 +232,13 @@ export function TenancyPanel({
           }}
         >
           <p className="font-semibold">Deposit handover</p>
+          <p className="text-xs text-muted-foreground">
+            When the tenant leaves or the stay ends, charge the held deposit
+            {row.agreed_deposit != null
+              ? ` (GHS ${row.agreed_deposit.toLocaleString()})`
+              : ""}{" "}
+            for damage, missing items, or unpaid bills. Return the balance.
+          </p>
           <Textarea
             name="condition"
             defaultValue={row.handover.condition_note ?? ""}
@@ -244,7 +251,7 @@ export function TenancyPanel({
               type="number"
               min={0}
               defaultValue={row.handover.deductions}
-              placeholder="Deductions"
+              placeholder="Charged against deposit"
               className="h-10 rounded-xl"
               disabled={!row.is_landlord}
             />
@@ -253,7 +260,7 @@ export function TenancyPanel({
               type="number"
               min={0}
               defaultValue={row.handover.returned_amount ?? ""}
-              placeholder="Returned"
+              placeholder="Returned to tenant"
               className="h-10 rounded-xl"
               disabled={!row.is_landlord}
             />

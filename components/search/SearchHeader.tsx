@@ -102,13 +102,13 @@ export function SearchHeader({
             </div>
 
             <h1 className="mt-8 max-w-lg font-heading text-[2.35rem] leading-[0.98] font-bold tracking-[-0.05em] text-white sm:mt-12 sm:text-5xl lg:text-[3.75rem]">
-              Rent direct.
+              Rent with
               <span className="mt-1 block bg-gradient-to-r from-[#fff6d8] via-[#f6d38a] to-[#e08a3c] bg-clip-text text-transparent">
-                No agents.
+                accountability.
               </span>
             </h1>
             <p className="mt-3 max-w-sm text-sm text-white/70 sm:text-[0.95rem]">
-              Homes from owners across Ghana.
+              Homes from landlords and agents across Ghana.
               {liveCount > 0
                 ? ` ${liveCount} live now.`
                 : null}

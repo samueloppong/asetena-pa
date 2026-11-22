@@ -122,9 +122,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const { listingActorFromRole } = await import("@/lib/listing-actor");
     const property = await prisma.property.create({
       data: {
         landlordId: session.user.id,
+        listingActorType: listingActorFromRole(session.user.role),
         title: data.title,
         description: data.description,
         propertyType: data.propertyType,
@@ -143,6 +145,7 @@ export async function POST(request: Request) {
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         squareFootage: data.squareFootage || null,
+        stayDuration: data.stayDuration,
         furnishing: data.furnishing,
         availableFrom: data.availableFrom ? new Date(`${data.availableFrom}T00:00:00.000Z`) : null,
         billsElectricity: data.billsElectricity,
@@ -150,7 +153,7 @@ export async function POST(request: Request) {
         billsInternet: data.billsInternet,
         petsAllowed: data.petsAllowed,
         smokingAllowed: data.smokingAllowed,
-        maxOccupants: data.maxOccupants || null,
+        maxOccupants: data.maxOccupants,
         quietHours: data.quietHours || null,
         houseRules: data.houseRules || null,
         accessInstructions: data.accessInstructions || null,

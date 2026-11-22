@@ -14,10 +14,24 @@ export async function POST(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const property = await prisma.property.findUnique({
     where: { id },
-    select: { landlordId: true },
+    select: { landlordId: true, listingActorType: true },
   });
   if (!property || property.landlordId !== session.user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (
+    property.listingActorType === "agent" ||
+    property.listingActorType === "firm" ||
+    session.user.role === "agent" ||
+    session.user.role === "firm"
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Owner verification (land title) is for landlord-listed homes. Agent and firm listings stay accountable under your account.",
+      },
+      { status: 403 }
+    );
   }
 
   const body = await request.json().catch(() => null);

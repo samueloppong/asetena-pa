@@ -1,4 +1,6 @@
-export type UserRole = "renter" | "landlord" | "admin";
+export type UserRole = "renter" | "landlord" | "agent" | "firm" | "admin";
+
+export type ListingActorType = "owner" | "agent" | "firm";
 export type VerificationStatus =
   | "unverified"
   | "pending"
@@ -32,6 +34,7 @@ export interface User {
   email: string;
   phone_number: string;
   full_name: string;
+  company_name?: string;
   role: UserRole;
   ghana_card_number?: string;
   id_verification_status: VerificationStatus;
@@ -41,6 +44,7 @@ export interface User {
 export interface PropertyAmenities {
   has_polytank_water: boolean;
   has_standby_generator: boolean;
+  has_solar: boolean;
   has_air_conditioning: boolean;
   is_walled_and_gated: boolean;
   has_self_meter: boolean;
@@ -84,8 +88,10 @@ export interface Property {
   bathrooms: number;
   square_footage?: number;
   is_direct_owner_verified: boolean;
+  listing_actor_type: ListingActorType;
   ownership_status: OwnershipReviewStatus;
   availability: ListingAvailability;
+  stay_duration: StayDuration;
   furnishing: Furnishing;
   available_from?: string;
   bills_electricity: BillPayer;
@@ -109,6 +115,8 @@ export interface Property {
 export type ListingAvailability = "available" | "paused" | "held" | "rented";
 
 export type Furnishing = "unfurnished" | "semi_furnished" | "furnished";
+
+export type StayDuration = "long_stay" | "short_stay";
 
 export type BillPayer = "tenant" | "landlord" | "shared";
 
@@ -200,6 +208,7 @@ export interface ManagedProperty {
   availability: ListingAvailability;
   is_active: boolean;
   is_direct_owner_verified: boolean;
+  listing_actor_type: ListingActorType;
   ownership_status: OwnershipReviewStatus;
   land_title_document_url?: string;
   security_deposit: number;
@@ -208,6 +217,7 @@ export interface ManagedProperty {
   bedrooms: number;
   bathrooms: number;
   description: string;
+  stay_duration: StayDuration;
   furnishing: Furnishing;
   available_from?: string;
   bills_electricity: BillPayer;
