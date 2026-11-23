@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { VerificationPanel } from "@/components/profile/VerificationPanel";
 import { MyTrustScoreCard } from "@/components/profile/MyTrustScoreCard";
@@ -110,12 +109,11 @@ export default function ProfilePage() {
   if (status === "unauthenticated" || !session?.user) {
     return (
       <main className="px-4 py-6">
-        <BrandLogo className="mb-4" />
         <h1 className="text-2xl font-extrabold tracking-tight text-brand">
           Profile
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Sign in to manage your Asetena Pa account
+          Sign in to manage your account
         </p>
         <div className="mt-8 flex flex-col gap-2">
           <Link
@@ -139,12 +137,11 @@ export default function ProfilePage() {
 
   return (
     <main className="px-4 py-6">
-      <BrandLogo className="mb-4" />
       <h1 className="text-2xl font-extrabold tracking-tight text-brand">
         Profile
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Signed in to Asetena Pa
+        Your account
       </p>
 
       <div className="mt-8 rounded-2xl border border-border bg-white p-5">

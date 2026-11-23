@@ -15,7 +15,7 @@ export function formatGhs(amount: number): string {
 }
 
 export function formatPricePerMonth(amount: number): string {
-  return `${formatGhs(amount)} / month`;
+  return `${formatGhs(amount)} pcm`;
 }
 
 export const ADVANCE_LABELS: Record<PaymentFrequency, string> = {

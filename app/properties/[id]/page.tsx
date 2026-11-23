@@ -97,7 +97,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         <div className="space-y-2">
           <p className="text-3xl font-extrabold tracking-tight text-brand">
             {formatGhs(property.price_per_month)}
-            <span className="text-base font-medium text-muted-foreground"> / month</span>
+            <span className="text-base font-medium text-muted-foreground"> pcm</span>
           </p>
           <PeopleWatching propertyId={property.id} className="mt-1" />
           <p className="text-sm text-muted-foreground">

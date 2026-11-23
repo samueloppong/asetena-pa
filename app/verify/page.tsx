@@ -1,4 +1,3 @@
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { VerifyWizard } from "@/components/verify/VerifyWizard";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
@@ -13,7 +12,6 @@ export default async function VerifyPage() {
 
   return (
     <main className="px-4 py-6">
-      <BrandLogo className="mb-4" />
       <h1 className="text-2xl font-semibold tracking-[-0.03em] text-brand">
         Ghana Card chip verification
       </h1>

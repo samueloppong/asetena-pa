@@ -23,6 +23,7 @@ import {
   depositFromMonths,
   depositMonthsFromAmount,
 } from "@/lib/listing-options";
+import { EnhancementPartners } from "@/components/mine/EnhancementPartners";
 import { FurnishingRadios } from "@/components/property/FurnishingRadios";
 import { OptionChipSelect } from "@/components/property/OptionChipSelect";
 import { TenancyPanel } from "@/components/rentals/TenancyPanel";
@@ -350,6 +351,11 @@ export function ListingDesk() {
           </ul>
         </section>
       )}
+
+      <EnhancementPartners
+        cityTown={properties[0]?.city_town}
+        neighborhood={properties[0]?.neighborhood}
+      />
 
       <section className="space-y-3">
         <h2 className="text-base font-bold text-brand">Your homes</h2>

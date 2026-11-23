@@ -53,7 +53,7 @@ function agreementBody(input: {
     `Landlord: ${input.landlordName}`,
     `Tenant: ${input.renterName}`,
     "",
-    `Rent: ${ghs(input.price)} per month`,
+    `Rent: ${ghs(input.price)} pcm`,
     `Security deposit: ${ghs(input.deposit)}`,
     `Advance: ${ADVANCE_LABELS[input.advance]}`,
     `Move-in date: ${input.moveIn ?? "not set"}`,
