@@ -47,55 +47,62 @@
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
   --color-gold-light: var(--gold-light);
+  --color-gold-ink: var(--gold-ink);
   --radius-sm: calc(var(--radius) * 0.7);
   --radius-md: calc(var(--radius) * 0.85);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.25);
   --radius-2xl: calc(var(--radius) * 1.5);
+  /* UI schema: buttons 14px, search panel 18px, cards 16px (--radius). */
+  --radius-button: 0.875rem;
+  --radius-panel: 1.125rem;
 }
 
 :root {
-  /* PRD premium marketplace tokens */
-  --background: #f8f8f7;
-  --foreground: #171717;
+  /* Design tokens from the UI schema (asetena-pa-schema/docs/ui-schema.md) */
+  --background: #f7f7f7; /* soft background */
+  --foreground: #17191c; /* dark text */
   --card: #ffffff;
-  --card-foreground: #171717;
+  --card-foreground: #17191c;
   --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #171717;
+  --popover-foreground: #17191c;
+  --primary: #17191c;
   --primary-foreground: #ffffff;
-  --secondary: #f8f8f7;
-  --secondary-foreground: #171717;
-  --muted: #f8f8f7;
-  --muted-foreground: #666666;
-  --accent: #fff3d6;
-  --accent-foreground: #171717;
+  --secondary: #f7f7f7;
+  --secondary-foreground: #17191c;
+  --muted: #f7f7f7;
+  /* Schema muted text is #777777 (4.48:1 on white); #757575 is the nearest shade that passes AA (4.6:1). */
+  --muted-foreground: #757575;
+  --accent: #fff4d1;
+  --accent-foreground: #17191c;
   --destructive: #dc4545;
   --border: #eaeaea;
   --input: #eaeaea;
-  --ring: #e9a92f;
-  --brand: #171717;
-  --gold: #e9a92f;
-  --gold-foreground: #171717;
-  --gold-light: #fff3d6;
-  --verified: #168653;
+  --ring: #f5b91b;
+  --brand: #17191c;
+  --gold: #f5b91b; /* primary gold */
+  --gold-foreground: #17191c;
+  --gold-light: #fff4d1;
+  /* Darker gold for small text on white/cream, where #f5b91b is too faint to read. */
+  --gold-ink: #946a00;
+  --verified: #078a55; /* success green */
   --verified-foreground: #ffffff;
-  --rating: #e9a92f;
+  --rating: #f5b91b;
   --surface: #ffffff;
-  --chart-1: #e9a92f;
-  --chart-2: #168653;
-  --chart-3: #666666;
-  --chart-4: #171717;
+  --chart-1: #f5b91b;
+  --chart-2: #078a55;
+  --chart-3: #757575;
+  --chart-4: #17191c;
   --chart-5: #dc4545;
-  --radius: 1rem;
+  --radius: 1rem; /* card radius 16px */
   --sidebar: #ffffff;
-  --sidebar-foreground: #171717;
-  --sidebar-primary: #171717;
+  --sidebar-foreground: #17191c;
+  --sidebar-primary: #17191c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fff3d6;
-  --sidebar-accent-foreground: #171717;
+  --sidebar-accent: #fff4d1;
+  --sidebar-accent-foreground: #17191c;
   --sidebar-border: #eaeaea;
-  --sidebar-ring: #e9a92f;
+  --sidebar-ring: #f5b91b;
 }
 
 @layer base {
@@ -104,7 +111,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    background-color: #f8f8f7;
+    background-color: #f7f7f7;
     -webkit-font-smoothing: antialiased;
   }
   html {
@@ -154,11 +161,11 @@
   }
 
   .btn-gold {
-    background-color: #e9a92f;
-    color: #171717;
+    background-color: #f5b91b;
+    color: #17191c;
   }
   .btn-gold:hover {
-    background-color: #f0b84a;
+    background-color: #f7c540;
   }
 }
 

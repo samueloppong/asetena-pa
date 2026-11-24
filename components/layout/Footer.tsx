@@ -45,7 +45,7 @@ export function Footer() {
         <div className="mb-10 max-w-md space-y-3">
           <BrandLogo compact />
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Asetena Pa connects tenants with verified landlords, letting agents,
+            Ashesi Pa connects tenants with verified landlords, letting agents,
             and real estate firms across Ghana — one platform for lettings
             accountability.
           </p>

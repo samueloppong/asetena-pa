@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Asetena Pa</string>
-    <string name="title_activity_main">Asetena Pa</string>
+    <string name="app_name">Ashesi Pa</string>
+    <string name="title_activity_main">Ashesi Pa</string>
     <string name="package_name">com.sheltergh.app</string>
     <string name="custom_url_scheme">com.sheltergh.app</string>
 </resources>

@@ -74,7 +74,7 @@ export function PropertySearch({
     <PageContainer className="relative z-20 -mt-14 sm:-mt-16">
       <div
         ref={rootRef}
-        className="rounded-[1.1rem] border border-border bg-white p-3 shadow-[0_16px_40px_rgb(0_0_0/0.08)] sm:p-4"
+        className="rounded-panel border border-border bg-white p-3 shadow-[0_16px_40px_rgb(0_0_0/0.1)] sm:p-4"
       >
         <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_0.8fr_0.9fr_0.9fr_auto] lg:items-end">
           <label className="relative block min-w-0">
@@ -98,12 +98,12 @@ export function PropertySearch({
                   }
                 }}
                 placeholder="City, neighbourhood or area"
-                className="h-12 w-full rounded-[0.75rem] border border-border bg-background pr-3 pl-10 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+                className="h-12 w-full rounded-button border border-border bg-background pr-3 pl-10 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
                 aria-label="Search Ghana locations"
               />
             </span>
             {open && suggestions.length > 0 ? (
-              <ul className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-[0.75rem] border border-border bg-white py-1 shadow-lg">
+              <ul className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-button border border-border bg-white py-1 shadow-lg">
                 {suggestions.map((s) => (
                   <li key={`${s.kind}-${s.value}`}>
                     <button
@@ -165,7 +165,7 @@ export function PropertySearch({
               value={values.minPrice}
               onChange={(e) => onChange({ minPrice: e.target.value })}
               placeholder="Min"
-              className="h-12 w-full rounded-[0.75rem] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+              className="h-12 w-full rounded-button border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
             />
           </label>
 
@@ -180,7 +180,7 @@ export function PropertySearch({
               value={values.maxPrice}
               onChange={(e) => onChange({ maxPrice: e.target.value })}
               placeholder="Max"
-              className="h-12 w-full rounded-[0.75rem] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+              className="h-12 w-full rounded-button border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
             />
           </label>
 
@@ -192,7 +192,7 @@ export function PropertySearch({
               type="button"
               onClick={onSearch}
               className={cn(
-                "btn-gold inline-flex h-12 w-full items-center justify-center gap-2 rounded-[0.75rem] px-5 text-sm font-bold transition"
+                "btn-gold inline-flex h-12 w-full items-center justify-center gap-2 rounded-button px-5 text-sm font-semibold transition"
               )}
             >
               <Search className="size-4" />

@@ -274,7 +274,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             className="border border-gold/20 bg-[#fffff7] px-4 py-4 [border-radius:unset]"
             style={{ borderRadius: "unset" }}
           >
-            <h2 className="text-[10px] font-bold tracking-[0.14em] text-gold uppercase">
+            <h2 className="text-[10px] font-bold tracking-[0.14em] text-gold-ink uppercase">
               Description
             </h2>
             <p className="mt-2 text-sm leading-[1.6] text-[#3a3428]">
@@ -346,7 +346,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <h2 className="text-base font-bold text-brand">Stay reviews</h2>
           {property.reviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Reviews appear after a renter moves in through Asetena Pa.
+              Reviews appear after a renter moves in through Ashesi Pa.
             </p>
           ) : (
             <ul className="space-y-3">

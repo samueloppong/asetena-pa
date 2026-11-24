@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { HeroSection, type HeroHome } from "@/components/home/HeroSection";
 import { PropertySearch } from "@/components/home/PropertySearch";
@@ -12,13 +12,40 @@ import { FilterBadges } from "@/components/search/FilterBadges";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ExperiencesNearby } from "@/components/experience/ExperiencesNearby";
-import { fetchProperties } from "@/lib/api-client";
+import { fetchPropertiesPage, type PropertySearchParams } from "@/lib/api-client";
 import { NEW_LISTINGS_EVENT } from "@/lib/use-new-listing-alerts";
 import { readSavedSearch, writeSavedSearch, type SavedSearch } from "@/lib/saved-search";
 import type { Experience } from "@/lib/experience-types";
 import type { FilterChip, Property } from "@/lib/types";
 
 type SortMode = "latest" | "price_asc" | "price_desc";
+
+/** Listings per "Load more" page for filtered/searched results. */
+const PAGE_SIZE = 12;
+
+function searchParamsFor(s: {
+  query: string;
+  filter: FilterChip;
+  furnishing: string;
+  minBeds: string;
+  availableBy: string;
+  billsIncluded: boolean;
+  minPrice: string;
+  maxPrice: string;
+  sort: SortMode;
+}): PropertySearchParams {
+  return {
+    q: s.query,
+    filter: s.filter,
+    furnishing: s.furnishing,
+    minBeds: s.minBeds,
+    availableBy: s.availableBy,
+    billsIncluded: s.billsIncluded,
+    minPrice: s.minPrice,
+    maxPrice: s.maxPrice,
+    sort: s.sort,
+  };
+}
 
 interface ExploreClientProps {
   initialProperties: Property[];
@@ -60,6 +87,11 @@ export function ExploreClient({
   const [saved, setSaved] = useState(false);
   const [sort, setSort] = useState<SortMode>("latest");
   const [searchTick, setSearchTick] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [resultTotal, setResultTotal] = useState<number | null>(null);
+  const searchVersion = useRef(0);
 
   useEffect(() => {
     if (isFilterChip(typeParam)) setFilter(typeParam);
@@ -78,6 +110,7 @@ export function ExploreClient({
 
   useEffect(() => {
     let cancelled = false;
+    searchVersion.current += 1;
     const isDefault =
       !query.trim() &&
       filter === "all" &&
@@ -86,10 +119,14 @@ export function ExploreClient({
       !availableBy &&
       !billsIncluded &&
       !minPrice &&
-      !maxPrice;
+      !maxPrice &&
+      sort === "latest";
 
     if (isDefault) {
       setProperties(initialProperties);
+      setResultTotal(null);
+      setPage(1);
+      setHasMore(false);
       setError(null);
       setLoading(false);
       return;
@@ -99,17 +136,17 @@ export function ExploreClient({
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchProperties({
-          q: query,
-          filter,
-          furnishing,
-          minBeds,
-          availableBy,
-          billsIncluded,
-          minPrice,
-          maxPrice,
+        const data = await fetchPropertiesPage({
+          ...searchParamsFor({ query, filter, furnishing, minBeds, availableBy, billsIncluded, minPrice, maxPrice, sort }),
+          page: 1,
+          limit: PAGE_SIZE,
         });
-        if (!cancelled) setProperties(data);
+        if (!cancelled) {
+          setProperties(data.properties);
+          setResultTotal(data.pagination.total);
+          setPage(1);
+          setHasMore(data.pagination.hasMore);
+        }
       } catch {
         if (!cancelled) setError("Could not load listings. Check your connection.");
       } finally {
@@ -129,6 +166,7 @@ export function ExploreClient({
     billsIncluded,
     minPrice,
     maxPrice,
+    sort,
     initialProperties,
     searchTick,
   ]);
@@ -145,7 +183,8 @@ export function ExploreClient({
         availableBy ||
         billsIncluded ||
         minPrice ||
-        maxPrice
+        maxPrice ||
+        sort !== "latest"
       ) {
         return;
       }
@@ -166,6 +205,7 @@ export function ExploreClient({
     billsIncluded,
     minPrice,
     maxPrice,
+    sort,
   ]);
 
   const heroHomes: HeroHome[] = initialProperties
@@ -184,20 +224,33 @@ export function ExploreClient({
     })
     .slice(0, 3);
 
-  const sortedProperties = useMemo(() => {
-    const list = [...properties];
-    if (sort === "price_asc") {
-      list.sort((a, b) => a.price_per_month - b.price_per_month);
-    } else if (sort === "price_desc") {
-      list.sort((a, b) => b.price_per_month - a.price_per_month);
-    } else {
-      list.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+  async function loadMore() {
+    if (loadingMore || !hasMore) return;
+    const version = searchVersion.current;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const nextPage = page + 1;
+      const data = await fetchPropertiesPage({
+        ...searchParamsFor({ query, filter, furnishing, minBeds, availableBy, billsIncluded, minPrice, maxPrice, sort }),
+        page: nextPage,
+        limit: PAGE_SIZE,
+      });
+      // The search changed while this page was loading; drop the stale page.
+      if (version !== searchVersion.current) return;
+      setProperties((prev) => {
+        const ids = new Set(prev.map((p) => p.id));
+        return [...prev, ...data.properties.filter((p) => !ids.has(p.id))];
+      });
+      setPage(nextPage);
+      setHasMore(data.pagination.hasMore);
+      setResultTotal(data.pagination.total);
+    } catch {
+      setError("Could not load more listings. Check your connection.");
+    } finally {
+      setLoadingMore(false);
     }
-    return list;
-  }, [properties, sort]);
+  }
 
   const featured = properties
     .filter(
@@ -269,8 +322,8 @@ export function ExploreClient({
               onClick={() => setFurnishing(value)}
               className={
                 furnishing === value
-                  ? "h-11 shrink-0 rounded-[0.75rem] border border-primary bg-accent px-3 text-sm font-semibold text-foreground"
-                  : "h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm text-foreground"
+                  ? "h-11 shrink-0 rounded-full border border-gold bg-accent px-4 text-sm font-semibold text-foreground"
+                  : "h-11 shrink-0 rounded-full border border-border bg-white px-4 text-sm text-foreground"
               }
             >
               {label}
@@ -280,10 +333,10 @@ export function ExploreClient({
             type="date"
             value={availableBy}
             onChange={(e) => setAvailableBy(e.target.value)}
-            className="h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm"
+            className="h-11 shrink-0 rounded-full border border-border bg-white px-3 text-sm"
             aria-label="Available by"
           />
-          <label className="flex h-11 shrink-0 items-center gap-2 rounded-[0.75rem] border border-border bg-white px-3 text-sm">
+          <label className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-border bg-white px-3 text-sm">
             <input
               type="checkbox"
               checked={billsIncluded}
@@ -293,7 +346,7 @@ export function ExploreClient({
           </label>
           <button
             type="button"
-            className="h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm font-medium"
+            className="h-11 shrink-0 rounded-full border border-border bg-white px-3 text-sm font-medium"
             onClick={() => {
               if (saved) {
                 writeSavedSearch(null);
@@ -314,7 +367,7 @@ export function ExploreClient({
           </button>
           <button
             type="button"
-            className="h-11 shrink-0 rounded-[0.75rem] border border-border bg-white px-3 text-sm font-medium text-muted-foreground"
+            className="h-11 shrink-0 rounded-full border border-border bg-white px-3 text-sm font-medium text-muted-foreground"
             onClick={clearFilters}
           >
             Clear all
@@ -330,7 +383,7 @@ export function ExploreClient({
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 Explore verified properties available directly from owners
                 {locationLabel !== "Ghana" ? ` · ${locationLabel}` : ""}.
-                {!loading ? ` ${sortedProperties.length} matches.` : null}
+                {!loading ? ` ${resultTotal ?? properties.length} matches.` : null}
               </p>
             </div>
             <label className="flex min-w-[12rem] items-center gap-2 text-sm">
@@ -359,7 +412,21 @@ export function ExploreClient({
               {error}
             </div>
           ) : (
-            <PropertyGrid properties={sortedProperties} />
+            <>
+              <PropertyGrid properties={properties} />
+              {hasMore ? (
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="h-11 rounded-full border border-border bg-white px-5 text-sm font-semibold text-foreground transition hover:border-gold disabled:opacity-60"
+                  >
+                    {loadingMore ? "Loading more…" : "Load more homes"}
+                  </button>
+                </div>
+              ) : null}
+            </>
           )}
         </section>
 

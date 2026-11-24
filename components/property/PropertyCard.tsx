@@ -220,7 +220,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
               className="border-y border-gold/20 bg-[#fffff7] px-4 py-3 [border-radius:unset]"
               style={{ borderRadius: "unset" }}
             >
-              <p className="mb-1.5 text-[10px] font-bold tracking-[0.14em] text-gold uppercase">
+              <p className="mb-1.5 text-[10px] font-bold tracking-[0.14em] text-gold-ink uppercase">
                 Description
               </p>
               <p className="line-clamp-3 text-sm leading-[1.55] text-[#3a3428]">

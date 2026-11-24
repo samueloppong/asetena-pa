@@ -250,6 +250,94 @@ const listings: SeedListing[] = [
     ],
   },
   {
+    title: "Labadi Beachside 2-Bed Short-Stay House",
+    description:
+      "Furnished 2-bedroom house in Labadi, a few minutes from the beach road. Solar-backed power, standby generator, and polytank water. Direct from owner for short stays of a few weeks or more.",
+    propertyType: "house",
+    stayDuration: "short_stay",
+    pricePerMonth: 3000,
+    advancePeriod: "monthly",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Labadi",
+    latitude: 5.5575,
+    longitude: -0.1386,
+    bedrooms: 2,
+    bathrooms: 2,
+    squareFootage: 950,
+    maxOccupants: 4,
+    furnishing: "furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: true,
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasSolar: true,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop",
+        category: "exterior",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&h=800&fit=crop",
+        category: "living_room",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
+    title: "Dzorwulu Furnished 3-Bed Short-Stay House",
+    description:
+      "Family-sized furnished house in Dzorwulu with a walled compound, parking, and AC in every room. Ideal for visiting families, consultants, and relocation stays. No agent fees.",
+    propertyType: "house",
+    stayDuration: "short_stay",
+    pricePerMonth: 3600,
+    advancePeriod: "monthly",
+    region: "Greater Accra",
+    cityTown: "Accra",
+    neighborhood: "Dzorwulu",
+    latitude: 5.5962,
+    longitude: -0.2045,
+    bedrooms: 3,
+    bathrooms: 2,
+    squareFootage: 1500,
+    maxOccupants: 6,
+    furnishing: "furnished",
+    smokingAllowed: false,
+    isDirectOwnerVerified: true,
+    amenities: {
+      hasPolytankWater: true,
+      hasStandbyGenerator: true,
+      hasSolar: false,
+      hasAirConditioning: true,
+      isWalledAndGated: true,
+      hasSelfMeter: true,
+      hasParkingSpace: true,
+    },
+    media: [
+      {
+        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop",
+        category: "exterior",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=1200&h=800&fit=crop",
+        category: "kitchen",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&h=800&fit=crop",
+        category: "bedroom",
+      },
+    ],
+  },
+  {
     title: "Quiet 3-Bedroom Apartment in Ahodwo",
     description:
       "Spacious apartment in Ahodwo, Kumasi. Family-friendly neighborhood with parking and gated access.",
@@ -334,7 +422,7 @@ const listings: SeedListing[] = [
   {
     title: "Labadi Beach Road Chamber & Hall (Agent)",
     description:
-      "Self-contained chamber and hall on Labadi Beach Road. Verified agent handles viewings, applications, and deposit handover on Asetena Pa.",
+      "Self-contained chamber and hall on Labadi Beach Road. Verified agent handles viewings, applications, and deposit handover on Ashesi Pa.",
     propertyType: "chamber_and_hall",
     pricePerMonth: 950,
     advancePeriod: "six_months",
@@ -416,7 +504,7 @@ const listings: SeedListing[] = [
   {
     title: "East Legon Executive Flat — Accra Homes Ltd",
     description:
-      "Corporate-managed 3-bedroom flat in East Legon. Listed by Accra Homes Ltd with deposit handover and tenancy tracking on Asetena Pa.",
+      "Corporate-managed 3-bedroom flat in East Legon. Listed by Accra Homes Ltd with deposit handover and tenancy tracking on Ashesi Pa.",
     propertyType: "apartment",
     pricePerMonth: 4000,
     advancePeriod: "one_year",
@@ -664,7 +752,7 @@ async function main() {
     create: {
       email: "admin@sheltergh.local",
       phoneNumber: "+233200000000",
-      fullName: "Asetena Pa Admin",
+      fullName: "Ashesi Pa Admin",
       passwordHash,
       role: "admin",
       idVerificationStatus: "verified",
@@ -778,6 +866,7 @@ async function main() {
         await prisma.property.update({
           where: { id: existing.id },
           data: {
+            description: listing.description,
             maxOccupants: listing.maxOccupants,
             stayDuration:
               listing.stayDuration ??

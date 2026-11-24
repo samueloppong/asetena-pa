@@ -56,7 +56,7 @@ export function RegisterForm() {
         toast.success("Account created — please sign in");
         router.push("/login");
       } else {
-        toast.success("Welcome to Asetena Pa");
+        toast.success("Welcome to Ashesi Pa");
         router.push("/");
         router.refresh();
       }

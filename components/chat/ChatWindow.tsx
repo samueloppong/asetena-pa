@@ -100,7 +100,7 @@ export function ChatWindow({ threadId }: ChatWindowProps) {
       await submitThreadReview(threadId, reviewRating, reviewComment.trim() || undefined);
       setHeader((h) => (h ? { ...h, already_reviewed: true } : h));
       setReviewOpen(false);
-      toast.success("Thanks — that helps keep Asetena Pa trustworthy");
+      toast.success("Thanks — that helps keep Ashesi Pa trustworthy");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not submit review");
     } finally {

@@ -21,7 +21,7 @@ export function MyTrustScoreCard() {
 
   const rows = [
     { label: "Identity verification", points: summary.breakdown.identity_points, max: 40 },
-    { label: "Time on Asetena Pa", points: summary.breakdown.tenure_points, max: 20 },
+    { label: "Time on Ashesi Pa", points: summary.breakdown.tenure_points, max: 20 },
     { label: "Community reviews", points: summary.breakdown.review_points, max: 30 },
     { label: "Member baseline", points: summary.breakdown.baseline_points, max: 10 },
   ];

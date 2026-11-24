@@ -14,6 +14,27 @@ const includeAll = {
   _count: { select: { reviews: true } },
 } as const;
 
+const DEFAULT_PAGE_SIZE = 12;
+const MAX_PAGE_SIZE = 50;
+
+type SortKey = "latest" | "price_asc" | "price_desc";
+
+// `id` is the tie-breaker so pages never overlap or skip rows.
+const SORT_ORDER: Record<SortKey, Prisma.PropertyOrderByWithRelationInput[]> = {
+  latest: [{ createdAt: "desc" }, { id: "asc" }],
+  price_asc: [{ pricePerMonth: "asc" }, { id: "asc" }],
+  price_desc: [{ pricePerMonth: "desc" }, { id: "asc" }],
+};
+
+function parseSort(value: string | null): SortKey {
+  return value === "price_asc" || value === "price_desc" ? value : "latest";
+}
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+  const n = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -29,7 +50,9 @@ export async function GET(request: Request) {
       availability: "available",
     };
 
-    if (type && type !== "all") {
+    if (type === "short_stay") {
+      where.stayDuration = "short_stay";
+    } else if (type && type !== "all") {
       where.propertyType = type as PropertyType;
     }
     if (verified === "true" || verified === "1") {
@@ -78,14 +101,35 @@ export async function GET(request: Request) {
       ];
     }
 
+    // Paging is opt-in: callers that send neither `page` nor `limit` still get
+    // every match in one response (used by new-listing alerts and the home page).
+    const paged = searchParams.has("page") || searchParams.has("limit");
+    const limit = paged
+      ? Math.min(parsePositiveInt(searchParams.get("limit"), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE)
+      : 0;
+    const page = parsePositiveInt(searchParams.get("page"), 1);
+    const sort = parseSort(searchParams.get("sort"));
+
+    const total = await prisma.property.count({ where });
     const properties = await prisma.property.findMany({
       where,
       include: includeAll,
-      orderBy: { createdAt: "desc" },
+      orderBy: SORT_ORDER[sort],
+      ...(paged ? { skip: (page - 1) * limit, take: limit } : {}),
     });
+
+    const pageSize = paged ? limit : Math.max(total, 1);
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
     return NextResponse.json({
       properties: properties.map(mapProperty),
+      pagination: {
+        page: paged ? page : 1,
+        limit: pageSize,
+        total,
+        totalPages,
+        hasMore: (paged ? page : 1) < totalPages,
+      },
     });
   } catch (error) {
     console.error("list properties error", error);

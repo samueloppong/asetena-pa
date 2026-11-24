@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Asetena Pa — Accountable Lettings in Ghana",
+  title: "Ashesi Pa — Accountable Lettings in Ghana",
   description:
     "Discover homes across Ghana from landlords and letting agents — one platform for accountable lettings.",
   icons: {

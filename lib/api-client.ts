@@ -12,7 +12,15 @@ import type {
   VerificationDocumentType,
 } from "@/lib/types";
 
-export async function fetchProperties(params?: {
+export type PropertyPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export type PropertySearchParams = {
   q?: string;
   filter?: FilterChip;
   furnishing?: string;
@@ -21,7 +29,16 @@ export async function fetchProperties(params?: {
   billsIncluded?: boolean;
   minPrice?: string;
   maxPrice?: string;
-}): Promise<AppProperty[]> {
+  sort?: "latest" | "price_asc" | "price_desc";
+  page?: number;
+  limit?: number;
+};
+
+/** Search listings with server-side sort and paging. Omit `page`/`limit` for all matches. */
+export async function fetchPropertiesPage(params?: PropertySearchParams): Promise<{
+  properties: AppProperty[];
+  pagination: PropertyPagination;
+}> {
   const search = new URLSearchParams();
   if (params?.q) search.set("q", params.q);
   if (params?.filter === "verified") search.set("verified", "true");
@@ -34,13 +51,24 @@ export async function fetchProperties(params?: {
   if (params?.billsIncluded) search.set("bills_included", "true");
   if (params?.minPrice) search.set("min_price", params.minPrice);
   if (params?.maxPrice) search.set("max_price", params.maxPrice);
+  if (params?.sort && params.sort !== "latest") search.set("sort", params.sort);
+  if (params?.page) search.set("page", String(params.page));
+  if (params?.limit) search.set("limit", String(params.limit));
   const qs = search.toString();
   const res = await fetch(`/api/v1/properties${qs ? `?${qs}` : ""}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to load properties");
   const data = await res.json();
-  return data.properties as AppProperty[];
+  return {
+    properties: data.properties as AppProperty[],
+    pagination: data.pagination as PropertyPagination,
+  };
+}
+
+export async function fetchProperties(params?: PropertySearchParams): Promise<AppProperty[]> {
+  const { properties } = await fetchPropertiesPage(params);
+  return properties;
 }
 
 export async function fetchProperty(id: string): Promise<AppProperty | null> {

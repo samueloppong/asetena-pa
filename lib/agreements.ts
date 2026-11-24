@@ -44,7 +44,7 @@ function agreementBody(input: {
   return [
     "SHELTERGH TENANCY AGREEMENT",
     "",
-    "This is the record of what these two people agreed on Asetena Pa. It does not replace advice from a lawyer.",
+    "This is the record of what these two people agreed on Ashesi Pa. It does not replace advice from a lawyer.",
     "",
     `Property: ${input.title}`,
     `Place: ${input.neighborhood}, ${input.cityTown}, ${input.region}`,
@@ -62,8 +62,8 @@ function agreementBody(input: {
     input.rules?.trim() || "No extra house rules were recorded.",
     "",
     "The tenant pays the rent in advance for the period above.",
-    "The landlord holds the security deposit. When the tenant leaves or the agreed stay ends, the landlord may charge the deposit for damage, missing items, or unpaid bills. Any balance left is returned after both sides confirm the deposit handover on Asetena Pa.",
-    "Each person signs by typing the full name on their Asetena Pa account. The wording above does not change after the landlord signs.",
+    "The landlord holds the security deposit. When the tenant leaves or the agreed stay ends, the landlord may charge the deposit for damage, missing items, or unpaid bills. Any balance left is returned after both sides confirm the deposit handover on Ashesi Pa.",
+    "Each person signs by typing the full name on their Ashesi Pa account. The wording above does not change after the landlord signs.",
   ].join("\n");
 }
 

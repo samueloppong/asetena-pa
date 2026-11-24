@@ -36,9 +36,9 @@ export function FilterBadges({ active, onChange }: FilterBadgesProps) {
               type="button"
               onClick={() => onChange(id)}
               className={cn(
-                "inline-flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-all",
+                "inline-flex h-11 items-center gap-1.5 rounded-full border px-4 text-xs font-medium whitespace-nowrap transition-all",
                 selected
-                  ? "border-transparent bg-[#171717] text-white"
+                  ? "border-transparent bg-brand text-white"
                   : "border-border bg-white text-foreground hover:bg-secondary"
               )}
             >

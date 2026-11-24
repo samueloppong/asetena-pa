@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -17,6 +18,50 @@ const centerLinks = [
   { href: "/#homes", label: "Short Stays", filter: "short_stay" },
 ] as const;
 
+const FILTER_LABELS: Record<string, string> = {
+  apartment: "Apartments",
+  house: "Houses",
+  short_stay: "Short Stays",
+};
+
+function NavLinksView({ activeLabel }: { activeLabel: string | null }) {
+  return (
+    <nav className="flex h-full items-center gap-8" aria-label="Main">
+      {centerLinks.map((link) => {
+        const active = link.label === activeLabel;
+        return (
+          <Link
+            key={link.label}
+            href={
+              "filter" in link && link.filter
+                ? `/?type=${link.filter}#homes`
+                : link.href
+            }
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "relative flex h-full items-center text-sm font-medium transition",
+              active
+                ? "text-foreground after:absolute after:inset-x-0 after:bottom-[18px] after:h-0.5 after:rounded-full after:bg-gold"
+                : "text-foreground/70 hover:text-foreground"
+            )}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** Reads the route so the matching link gets the gold underline. */
+function NavLinks() {
+  const pathname = usePathname();
+  const type = useSearchParams().get("type");
+  const activeLabel =
+    pathname !== "/" ? null : (type && FILTER_LABELS[type]) || "Find a Home";
+  return <NavLinksView activeLabel={activeLabel} />;
+}
+
 export function Navbar({ className }: { className?: string }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { data: session, status } = useSession();
@@ -31,47 +76,35 @@ export function Navbar({ className }: { className?: string }) {
           className
         )}
       >
-        <PageContainer className="flex h-[76px] items-center justify-between gap-6">
+        <PageContainer className="flex h-[72px] items-center justify-between gap-6">
           <BrandLogo compact priority />
 
-          <nav className="flex items-center gap-1">
-            {centerLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={
-                  "filter" in link && link.filter
-                    ? `/?type=${link.filter}#homes`
-                    : link.href
-                }
-                className="rounded-[0.7rem] px-3 py-2 text-sm font-medium text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <Suspense fallback={<NavLinksView activeLabel={null} />}>
+            <NavLinks />
+          </Suspense>
 
           <div className="flex items-center gap-2">
             <Link
               href="/post"
-              className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-secondary"
+              className="inline-flex h-10 items-center rounded-full bg-secondary px-4 text-sm font-semibold text-foreground transition hover:bg-border"
             >
               List Your Property
             </Link>
             {status === "loading" ? (
-              <span className="h-11 w-24 animate-pulse rounded-[0.7rem] bg-secondary" />
+              <span className="h-11 w-24 animate-pulse rounded-button bg-secondary" />
             ) : signedIn ? (
               <>
                 {canList ? (
                   <Link
                     href="/mine"
-                    className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                    className="rounded-button px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
                   >
                     My listings
                   </Link>
                 ) : null}
                 <Link
                   href="/profile"
-                  className="btn-gold inline-flex h-11 max-w-[10rem] items-center truncate rounded-[0.7rem] px-4 text-sm font-semibold transition"
+                  className="btn-gold inline-flex h-11 max-w-[10rem] items-center truncate rounded-button px-4 text-sm font-semibold transition"
                 >
                   {session.user.name?.split(" ")[0] || "Profile"}
                 </Link>
@@ -80,13 +113,13 @@ export function Navbar({ className }: { className?: string }) {
               <>
                 <Link
                   href="/login"
-                  className="rounded-[0.7rem] px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                  className="rounded-button px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="btn-gold inline-flex h-11 items-center rounded-[0.7rem] px-4 text-sm font-semibold transition"
+                  className="btn-gold inline-flex h-11 items-center rounded-button px-4 text-sm font-semibold transition"
                 >
                   Get Started
                 </Link>
@@ -101,7 +134,7 @@ export function Navbar({ className }: { className?: string }) {
         <BrandLogo compact priority />
         <button
           type="button"
-          className="inline-flex size-10 items-center justify-center rounded-[0.7rem] border border-border"
+          className="inline-flex size-10 items-center justify-center rounded-button border border-border"
           aria-label="Open menu"
           onClick={() => setDrawerOpen(true)}
         >

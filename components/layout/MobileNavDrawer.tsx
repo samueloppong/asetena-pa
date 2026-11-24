@@ -64,7 +64,7 @@ export function MobileNavDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-10 items-center justify-center rounded-[0.7rem] border border-border"
+            className="inline-flex size-10 items-center justify-center rounded-button border border-border"
             aria-label="Close menu"
           >
             <X className="size-4" />
@@ -76,7 +76,7 @@ export function MobileNavDrawer({
               key={link.href + link.label}
               href={link.href}
               onClick={onClose}
-              className="rounded-[0.7rem] px-3 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
+              className="rounded-button px-3 py-3 text-sm font-medium text-foreground transition hover:bg-secondary"
             >
               {link.label}
             </Link>
@@ -88,7 +88,7 @@ export function MobileNavDrawer({
               href={link.href}
               onClick={onClose}
               className={cn(
-                "rounded-[0.7rem] px-3 py-3 text-sm font-medium text-foreground transition hover:bg-secondary",
+                "rounded-button px-3 py-3 text-sm font-medium text-foreground transition hover:bg-secondary",
                 link.primary && "btn-gold mt-1 text-center font-semibold"
               )}
             >

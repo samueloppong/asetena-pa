@@ -11,7 +11,7 @@ export class GhanaCardNfcWeb implements GhanaCardNfcPlugin {
 
   async readChip(_options: GhanaCardMrzKeys): Promise<never> {
     throw new Error(
-      "Ghana Card chip reading requires the Asetena Pa Android app with NFC. Open this screen on your phone after installing the APK."
+      "Ghana Card chip reading requires the Ashesi Pa Android app with NFC. Open this screen on your phone after installing the APK."
     );
   }
 

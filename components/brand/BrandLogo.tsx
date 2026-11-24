@@ -15,7 +15,7 @@ interface BrandLogoProps {
 }
 
 /**
- * Asetena Pa lockup: Adinkra-inspired mark + Manrope wordmark.
+ * Ashesi Pa lockup: Adinkra-inspired mark + Manrope wordmark.
  */
 export function BrandLogo({
   className,
@@ -55,7 +55,7 @@ export function BrandLogo({
               : "text-3xl sm:text-4xl md:text-5xl"
           )}
         >
-          Asetena Pa
+          Ashesi Pa
         </span>
       )}
     </span>
@@ -67,7 +67,7 @@ export function BrandLogo({
     <Link
       href={href}
       className="inline-flex min-w-0 items-center"
-      aria-label="Asetena Pa home"
+      aria-label="Ashesi Pa home"
     >
       {content}
     </Link>

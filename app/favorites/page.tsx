@@ -34,7 +34,7 @@ export default function FavoritesPage() {
           Favorites
         </h1>
         <p className="text-sm text-muted-foreground">
-          Homes you saved to your Asetena Pa account
+          Homes you saved to your Ashesi Pa account
         </p>
       </div>
 

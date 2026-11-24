@@ -40,7 +40,7 @@ export function ListingMap({
       </div>
 
       <div className="space-y-2 border border-border bg-white px-4 py-3 [border-radius:unset]">
-        <p className="text-[10px] font-bold tracking-[0.14em] text-gold uppercase">
+        <p className="text-[10px] font-bold tracking-[0.14em] text-gold-ink uppercase">
           GPS coordinates
         </p>
         <p className="font-mono text-sm font-semibold tracking-tight text-foreground">

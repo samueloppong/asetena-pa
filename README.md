@@ -1,4 +1,4 @@
-# Asetena Pa
+# Ashesi Pa
 
 Direct-from-owner rentals for Ghana. Next.js + Postgres + MinIO (Docker), before Supabase.
 
@@ -37,7 +37,7 @@ Open [http://localhost:3000](http://localhost:3000).
 3. If the page will not load, allow inbound TCP **3000** in Windows Firewall (run as Admin):
 
 ```bat
-netsh advfirewall firewall add rule name="Asetena Pa Dev 3000" dir=in action=allow protocol=TCP localport=3000
+netsh advfirewall firewall add rule name="Ashesi Pa Dev 3000" dir=in action=allow protocol=TCP localport=3000
 ```
 
 Uploaded photos are served through `/api/v1/media/...` on the same host so they work on mobile.
@@ -100,7 +100,7 @@ Same idea as UK GOV ID Check: unlock the National ID **chip**, prove the data is
 | Face match / 3D liveness SDK | Presence + score gate; swap in commercial SDK |
 | Live NIA registry lookup | Format stub; wire NIA API when credentials available |
 
-Browsers cannot talk to an ICAO chip — use the Asetena Pa Android app.
+Browsers cannot talk to an ICAO chip — use the Ashesi Pa Android app.
 
 Seeded landlords are already verified. New sign-ups and the demo renter start **unverified**.
 

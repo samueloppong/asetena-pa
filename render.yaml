@@ -1,4 +1,4 @@
-# Asetena Pa — Render Blueprint (web + Postgres)
+# Ashesi Pa — Render Blueprint (web + Postgres)
 # Free-tier friendly for live testing. Uploads fall back to ephemeral disk if MinIO is unset.
 
 databases:
