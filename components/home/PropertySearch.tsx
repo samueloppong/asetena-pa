@@ -74,7 +74,7 @@ export function PropertySearch({
     <PageContainer className="relative z-20 -mt-14 sm:-mt-16">
       <div
         ref={rootRef}
-        className="rounded-panel border border-border bg-white p-3 shadow-[0_16px_40px_rgb(0_0_0/0.1)] sm:p-4"
+        className="rounded-[30px] border border-border bg-white p-3 shadow-[0_16px_40px_rgb(0_0_0/0.1)] sm:p-4"
       >
         <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_0.8fr_0.9fr_0.9fr_auto] lg:items-end">
           <label className="relative block min-w-0">
@@ -98,7 +98,7 @@ export function PropertySearch({
                   }
                 }}
                 placeholder="City, neighbourhood or area"
-                className="h-12 w-full rounded-button border border-border bg-background pr-3 pl-10 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+                className="h-12 w-full rounded-[30px] border border-border bg-background pr-3 pl-10 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
                 aria-label="Search Ghana locations"
               />
             </span>
@@ -132,6 +132,7 @@ export function PropertySearch({
             </span>
             <FieldSelect
               aria-label="Property type"
+              triggerClassName="!rounded-[30px]"
               value={values.filter}
               options={TYPE_OPTIONS}
               onValueChange={(filter) =>
@@ -146,6 +147,7 @@ export function PropertySearch({
             </span>
             <FieldSelect
               aria-label="Minimum bedrooms"
+              triggerClassName="!rounded-[30px]"
               value={values.minBeds || "any"}
               options={BED_OPTIONS}
               onValueChange={(minBeds) =>
@@ -165,7 +167,7 @@ export function PropertySearch({
               value={values.minPrice}
               onChange={(e) => onChange({ minPrice: e.target.value })}
               placeholder="Min"
-              className="h-12 w-full rounded-button border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+              className="h-12 w-full rounded-[30px] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
             />
           </label>
 
@@ -180,7 +182,7 @@ export function PropertySearch({
               value={values.maxPrice}
               onChange={(e) => onChange({ maxPrice: e.target.value })}
               placeholder="Max"
-              className="h-12 w-full rounded-button border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
+              className="h-12 w-full rounded-[30px] border border-border bg-background px-3 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/25"
             />
           </label>
 
@@ -192,7 +194,7 @@ export function PropertySearch({
               type="button"
               onClick={onSearch}
               className={cn(
-                "btn-gold inline-flex h-12 w-full items-center justify-center gap-2 rounded-button px-5 text-sm font-semibold transition"
+                "btn-gold inline-flex h-12 w-full items-center justify-center gap-2 rounded-[30px] px-5 text-sm font-semibold transition"
               )}
             >
               <Search className="size-4" />
