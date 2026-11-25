@@ -102,6 +102,7 @@ export interface Property {
   max_occupants?: number;
   quiet_hours?: string;
   house_rules?: string;
+  features?: Record<string, number>;
   price_history: PricePoint[];
   is_active: boolean;
   amenities: PropertyAmenities;
@@ -287,6 +288,9 @@ export interface AdminVerificationRequest extends VerificationRequestSummary {
   user_name: string;
   user_email: string;
   user_role: UserRole;
+  /** Admin-only. Never part of public listing payloads. */
+  user_company_name?: string;
+  user_registration_number?: string;
   id_number: string;
   id_photo_url: string;
   selfie_url: string;

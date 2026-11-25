@@ -58,14 +58,15 @@ export function HeroSection({
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#eef0f3] to-background">
-      {/* Soft green wash behind the photo, as in the design mockup */}
+      {/* Pale green circle tucked behind the photo's sweeping bottom-left curve */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-28 left-[18%] size-[26rem] rounded-full bg-verified/10 blur-3xl"
+        className="pointer-events-none absolute bottom-0 left-[30%] hidden size-[22rem] translate-y-[45%] rounded-full bg-verified/10 lg:block"
       />
 
-      <PageContainer className="relative grid items-center gap-10 pt-8 pb-28 sm:pt-12 sm:pb-32 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8 lg:pt-10 lg:pb-36">
-        <div className="max-w-xl">
+      {/* No `relative` here: on desktop the photo and badge position against the full-width section. */}
+      <PageContainer className="grid items-center gap-10 pt-8 pb-28 sm:pt-12 sm:pb-32 lg:grid-cols-2 lg:gap-8 lg:pt-10 lg:pb-36">
+        <div className="relative z-10 max-w-xl">
           <p
             className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-sm"
             suppressHydrationWarning
@@ -100,19 +101,20 @@ export function HeroSection({
           </div>
         </div>
 
-        <div className="relative">
-          <div className="relative h-60 overflow-hidden rounded-[1.5rem] sm:h-80 lg:h-[24rem] lg:rounded-l-[9rem] lg:rounded-r-[1.5rem]">
+        {/* Stacked card on mobile; on desktop the photo bleeds to the right edge (see .hero-photo-shape). */}
+        <div className="relative lg:static">
+          <div className="hero-photo-shape relative h-60 overflow-hidden rounded-[1.5rem] sm:h-80 lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[min(54%,62rem)]">
             <Image
               src={HERO_PHOTO}
               alt="Bright, furnished living room in a verified Ghana home"
               fill
               priority
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 54vw, 100vw"
               className="object-cover"
             />
           </div>
           <div
-            className="absolute right-3 -bottom-5 flex min-w-[15rem] items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_12px_32px_rgb(0_0_0/0.12)] sm:right-6"
+            className="absolute right-3 -bottom-5 z-10 flex min-w-[15rem] items-center gap-3 rounded-[30px] bg-white px-4 py-3 shadow-[0_12px_32px_rgb(0_0_0/0.12)] sm:right-6 lg:right-10 lg:bottom-20"
             aria-live="polite"
           >
             <span

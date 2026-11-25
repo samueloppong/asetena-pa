@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Plus, Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,7 @@ export function ListingDesk() {
   const [requests, setRequests] = useState<RentalRequestDto[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -95,6 +98,25 @@ export function ListingDesk() {
       toast.success(AVAILABILITY_LABEL[availability]);
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function deleteListing(id: string) {
+    setBusy(id);
+    try {
+      const res = await fetch(`/api/v1/properties/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data.error ?? "Could not delete the listing");
+        return;
+      }
+      setProperties((prev) => prev?.filter((item) => item.id !== id) ?? prev);
+      setRequests((prev) => prev.filter((row) => row.property_id !== id));
+      if (editing === id) setEditing(null);
+      toast.success("Listing deleted");
+    } finally {
+      setBusy(null);
+      setConfirmDelete(null);
     }
   }
 
@@ -358,9 +380,24 @@ export function ListingDesk() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-base font-bold text-brand">Your homes</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-brand">Your homes</h2>
+          <Link
+            href="/post/studio"
+            className="btn-gold inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold"
+          >
+            <Plus className="size-4" />
+            New listing
+          </Link>
+        </div>
         {properties.length === 0 ? (
-          <p className="text-sm text-muted-foreground">You have not published a home yet.</p>
+          <p className="text-sm text-muted-foreground">
+            You have not published a home yet.{" "}
+            <Link href="/post/studio" className="font-semibold text-brand underline underline-offset-2">
+              Create your first listing
+            </Link>
+            .
+          </p>
         ) : (
           <ul className="space-y-3">
             {properties.map((property) => (
@@ -411,6 +448,40 @@ export function ListingDesk() {
                   <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => setEditing(editing === property.id ? null : property.id)}>
                     Edit
                   </Button>
+                  {confirmDelete === property.id ? (
+                    <span className="ml-auto flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-1">
+                      <span className="text-xs font-medium text-destructive">Delete for good?</span>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="rounded-lg"
+                        disabled={busy === property.id}
+                        onClick={() => deleteListing(property.id)}
+                      >
+                        Yes, delete
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-lg"
+                        disabled={busy === property.id}
+                        onClick={() => setConfirmDelete(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </span>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="ml-auto rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={busy === property.id}
+                      onClick={() => setConfirmDelete(property.id)}
+                    >
+                      <Trash2 className="size-4" />
+                      Delete
+                    </Button>
+                  )}
                 </div>
                 {editing === property.id && (
                   <form

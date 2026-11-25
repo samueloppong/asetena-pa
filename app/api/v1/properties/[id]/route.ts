@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireVerifiedLandlord } from "@/lib/auth-helpers";
+import { requireLandlord, requireVerifiedLandlord } from "@/lib/auth-helpers";
 import { mapProperty } from "@/lib/mappers";
 import { propertyUpdateSchema } from "@/lib/validations";
 
@@ -112,4 +112,47 @@ export async function PATCH(request: Request, context: RouteContext) {
   });
 
   return NextResponse.json({ property: mapProperty(property) });
+}
+
+/**
+ * Permanently delete one of your own listings (photos, reviews, chats and requests for it go
+ * with it). Refused while a tenant or applicant is in play, so live tenancies are never lost.
+ */
+export async function DELETE(_request: Request, context: RouteContext) {
+  const { session, error } = await requireLandlord();
+  if (error || !session) return error!;
+
+  const { id } = await context.params;
+  const existing = await prisma.property.findUnique({
+    where: { id },
+    select: {
+      landlordId: true,
+      availability: true,
+      rentalRequests: {
+        where: {
+          OR: [
+            { status: { in: ["requested", "accepted"] } },
+            { kind: "application", status: "completed" },
+          ],
+        },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
+  if (!existing || existing.landlordId !== session.user.id) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (existing.availability === "held" || existing.rentalRequests.length > 0) {
+    return NextResponse.json(
+      {
+        error:
+          "This listing has open requests or a tenancy. Resolve them first, or pause the listing instead.",
+      },
+      { status: 409 }
+    );
+  }
+
+  await prisma.property.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
 }

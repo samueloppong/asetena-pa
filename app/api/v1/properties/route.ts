@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { mapProperty } from "@/lib/mappers";
 import { propertyCreateSchema } from "@/lib/validations";
+import { parseFeatures } from "@/lib/listing-features";
 import { requireVerifiedLandlord } from "@/lib/auth-helpers";
 import type { PropertyType, Prisma } from "@prisma/client";
 
@@ -201,6 +202,7 @@ export async function POST(request: Request) {
         quietHours: data.quietHours || null,
         houseRules: data.houseRules || null,
         accessInstructions: data.accessInstructions || null,
+        features: parseFeatures(data.features),
         priceChanges: { create: { pricePerMonth: data.pricePerMonth } },
         amenities: { create: data.amenities },
         media: {

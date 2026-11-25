@@ -92,6 +92,15 @@ export function VerificationQueue() {
           <p className="mt-2 text-xs text-muted-foreground">
             ID number: <span className="font-medium text-foreground">{r.id_number}</span>
           </p>
+          {(r.user_role === "agent" || r.user_role === "firm") && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {r.user_role === "firm" ? "Firm" : "Agent"} registration no.:{" "}
+              <span className="font-medium text-foreground">
+                {r.user_registration_number ?? "Not provided"}
+              </span>
+              {r.user_company_name ? ` · ${r.user_company_name}` : ""}
+            </p>
+          )}
 
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/auth-helpers";
+import { registrationNumberSchema } from "@/lib/validations";
 
 export async function PATCH(request: Request) {
   const { session, error } = await requireSession();
@@ -26,11 +27,27 @@ export async function PATCH(request: Request) {
     );
   }
 
+  // Agents and firms must give a registration number; it stays private (never in public payloads).
+  let registrationNumber: string | undefined;
+  if (role === "agent" || role === "firm") {
+    const parsedReg = registrationNumberSchema.safeParse(
+      typeof body.registrationNumber === "string" ? body.registrationNumber : ""
+    );
+    if (!parsedReg.success) {
+      return NextResponse.json(
+        { error: parsedReg.error.issues[0]?.message ?? "Registration number is required" },
+        { status: 400 }
+      );
+    }
+    registrationNumber = parsedReg.data;
+  }
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: {
       role,
       ...(role === "firm" ? { companyName } : {}),
+      ...(registrationNumber ? { registrationNumber } : {}),
     },
   });
 

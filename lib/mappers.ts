@@ -6,6 +6,7 @@ import type {
   User,
 } from "@prisma/client";
 import type { Property as AppProperty, User as AppUser } from "./types";
+import { parseFeatures } from "./listing-features";
 import { toPublicMediaUrl } from "./media-url";
 
 type PropertyWithRelations = Property & {
@@ -76,6 +77,7 @@ export function mapProperty(property: PropertyWithRelations): AppProperty {
     max_occupants: property.maxOccupants ?? undefined,
     quiet_hours: property.quietHours ?? undefined,
     house_rules: property.houseRules ?? undefined,
+    features: parseFeatures(property.features),
     price_history: (property.priceChanges ?? [])
       .slice()
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())

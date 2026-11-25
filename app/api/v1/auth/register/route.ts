@@ -15,8 +15,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, phoneNumber, fullName, companyName, password, role } =
-      parsed.data;
+    const {
+      email,
+      phoneNumber,
+      fullName,
+      companyName,
+      registrationNumber,
+      password,
+      role,
+    } = parsed.data;
     const existing = await prisma.user.findFirst({
       where: {
         OR: [{ email: email.toLowerCase() }, { phoneNumber }],
@@ -37,6 +44,10 @@ export async function POST(request: Request) {
         fullName,
         companyName:
           role === "firm" ? companyName?.trim() || null : null,
+        registrationNumber:
+          role === "agent" || role === "firm"
+            ? registrationNumber?.trim() || null
+            : null,
         passwordHash,
         role,
       },

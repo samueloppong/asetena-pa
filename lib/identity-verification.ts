@@ -81,7 +81,17 @@ export async function listPendingVerifications(): Promise<
   const requests = await prisma.identityVerificationRequest.findMany({
     where: { status: "pending" },
     orderBy: { createdAt: "asc" },
-    include: { user: { select: { fullName: true, email: true, role: true } } },
+    include: {
+      user: {
+        select: {
+          fullName: true,
+          email: true,
+          role: true,
+          companyName: true,
+          registrationNumber: true,
+        },
+      },
+    },
   });
 
   return requests.map((r) => ({
@@ -95,6 +105,8 @@ export async function listPendingVerifications(): Promise<
     user_name: r.user.fullName,
     user_email: r.user.email,
     user_role: r.user.role,
+    user_company_name: r.user.companyName ?? undefined,
+    user_registration_number: r.user.registrationNumber ?? undefined,
     id_number: r.idNumber,
     id_photo_url: r.idPhotoUrl,
     selfie_url: r.selfieUrl,

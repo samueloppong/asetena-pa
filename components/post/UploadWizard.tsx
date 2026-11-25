@@ -12,8 +12,10 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  LayoutTemplate,
   Upload,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -383,6 +385,20 @@ export function UploadWizard() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6 px-4 py-6">
+      <Link
+        href="/post/studio"
+        className="flex items-center gap-3 rounded-2xl border border-gold/50 bg-accent px-4 py-3 text-sm transition hover:border-gold"
+      >
+        <LayoutTemplate className="size-5 shrink-0 text-brand" />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold text-brand">Try the drag &amp; drop Listing Studio</span>
+          <span className="block text-xs text-muted-foreground">
+            Build your listing card visually — best on a larger screen.
+          </span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-brand" />
+      </Link>
+
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-extrabold tracking-tight text-brand">

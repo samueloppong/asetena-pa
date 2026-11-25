@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { VerificationPanel } from "@/components/profile/VerificationPanel";
 import { MyTrustScoreCard } from "@/components/profile/MyTrustScoreCard";
+import { RegistrationNumberCard } from "@/components/profile/RegistrationNumberCard";
 import { fetchVerifyStatus } from "@/lib/verify-client";
 import type { VerificationStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -63,11 +64,19 @@ export default function ProfilePage() {
   }, [status]);
 
   const [firmName, setFirmName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
 
   async function becomeListingRole(
     role: "landlord" | "agent" | "firm",
     companyName?: string
   ) {
+    if (
+      (role === "agent" || role === "firm") &&
+      registrationNumber.trim().length < 3
+    ) {
+      toast.error(`Enter your ${role} registration number first`);
+      return;
+    }
     if (kycStatus !== "verified") {
       toast.message("Verify your Ghana Card first");
       return;
@@ -82,10 +91,14 @@ export default function ProfilePage() {
       body: JSON.stringify({
         role,
         ...(role === "firm" ? { companyName: companyName!.trim() } : {}),
+        ...(role === "agent" || role === "firm"
+          ? { registrationNumber: registrationNumber.trim() }
+          : {}),
       }),
     });
     if (!res.ok) {
-      toast.error("Could not update role");
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Could not update role");
       return;
     }
     await update({ role });
@@ -201,6 +214,12 @@ export default function ProfilePage() {
         <MyTrustScoreCard />
       </div>
 
+      {(session.user.role === "agent" || session.user.role === "firm") && (
+        <div className="mt-6">
+          <RegistrationNumberCard role={session.user.role} />
+        </div>
+      )}
+
       <div className="mt-6 flex flex-col gap-2">
         {session.user.role === "admin" && (
           <>
@@ -256,6 +275,19 @@ export default function ProfilePage() {
               >
                 Become an agent
               </Button>
+            </div>
+            <div className="space-y-1">
+              <input
+                value={registrationNumber}
+                onChange={(e) => setRegistrationNumber(e.target.value)}
+                maxLength={60}
+                placeholder="Registration number (agents & firms only)"
+                aria-label="Agent or firm registration number"
+                className="h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+              />
+              <p className="px-1 text-[11px] text-muted-foreground">
+                Kept private — only our team can see it.
+              </p>
             </div>
             <div className="flex gap-2">
               <input

@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+/** Agent / firm registration number (e.g. a lettings agency or company registration ID). */
+export const registrationNumberSchema = z
+  .string()
+  .trim()
+  .min(3, "Enter your registration number")
+  .max(60, "Registration number is too long")
+  .regex(
+    /^[A-Za-z0-9][A-Za-z0-9 ./-]*$/,
+    "Use letters, numbers, spaces, / . or -"
+  );
+
 export const registerSchema = z
   .object({
     email: z.string().email(),
@@ -10,6 +21,7 @@ export const registerSchema = z
       .regex(/^\+?[0-9]+$/, "Use a valid phone number"),
     fullName: z.string().min(2).max(100),
     companyName: z.string().min(2).max(150).optional().nullable(),
+    registrationNumber: z.string().max(60).optional().nullable(),
     password: z.string().min(8).max(100),
     role: z.enum(["renter", "landlord", "agent", "firm"]).default("renter"),
   })
@@ -20,6 +32,16 @@ export const registerSchema = z
         message: "Company name is required for firms",
         path: ["companyName"],
       });
+    }
+    if (data.role === "agent" || data.role === "firm") {
+      const parsed = registrationNumberSchema.safeParse(data.registrationNumber ?? "");
+      if (!parsed.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: parsed.error.issues[0]?.message ?? "Registration number is required",
+          path: ["registrationNumber"],
+        });
+      }
     }
   });
 
@@ -84,6 +106,10 @@ export const propertyCreateSchema = z.object({
   quietHours: z.string().max(80).optional().nullable(),
   houseRules: z.string().max(1000).optional().nullable(),
   accessInstructions: z.string().max(1000).optional().nullable(),
+  features: z
+    .record(z.string(), z.coerce.number().int().min(0).max(50))
+    .optional()
+    .nullable(),
   media: z
     .array(
       z.object({

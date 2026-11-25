@@ -169,6 +169,33 @@
   }
 }
 
+/*
+ * Hero photo outline from the design mockup (desktop): flush with the page's right edge and the
+ * hero band's top and bottom, a large rounded top-left corner, and a long sweeping bottom-left curve.
+ * Unlayered on purpose so it overrides the utility radius used for the stacked mobile card.
+ */
+@media (min-width: 64rem) {
+  .hero-photo-shape {
+    border-radius: 7rem 0 0 14rem / 9rem 0 0 12rem;
+  }
+}
+
+/*
+ * Photo delete bins (listing studio). Always visible by default so a photo can be removed on any
+ * device; on hover-capable devices they are tucked away until the photo is hovered or focused.
+ * Plain CSS (not Tailwind variants) so it never depends on pointer-type detection.
+ */
+@media (hover: hover) {
+  .photo-bin {
+    opacity: 0;
+  }
+  .photo-bin-host:hover .photo-bin,
+  .photo-bin:hover,
+  .photo-bin:focus-visible {
+    opacity: 1;
+  }
+}
+
 @keyframes hero-float {
   0%,
   100% {

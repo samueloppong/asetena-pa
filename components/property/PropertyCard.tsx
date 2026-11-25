@@ -21,9 +21,11 @@ import { PropertyImage } from "@/components/property/PropertyImage";
 interface PropertyCardProps {
   property: Property;
   compact?: boolean;
+  /** Draft preview: looks identical, but nothing navigates or is saved. */
+  preview?: boolean;
 }
 
-export function PropertyCard({ property, compact = false }: PropertyCardProps) {
+export function PropertyCard({ property, compact = false, preview = false }: PropertyCardProps) {
   const photos = useMemo(() => {
     const sorted = property.media
       .slice()
@@ -51,18 +53,19 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
   }, [property.created_at]);
 
   useEffect(() => {
-    if (status !== "authenticated") {
+    if (preview || status !== "authenticated") {
       setFavorited(false);
       return;
     }
     fetchFavorites()
       .then((data) => setFavorited(data.ids.includes(property.id)))
       .catch(() => setFavorited(false));
-  }, [property.id, status]);
+  }, [property.id, status, preview]);
 
   async function onHeartClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (preview) return;
     if (status !== "authenticated") {
       toast.message("Sign in to save homes");
       router.push("/login");
@@ -86,6 +89,7 @@ export function PropertyCard({ property, compact = false }: PropertyCardProps) {
   return (
     <Link
       href={`/properties/${property.id}`}
+      onClick={preview ? (e) => e.preventDefault() : undefined}
       className={cn(
         "listing-card group flex flex-col overflow-hidden rounded-[1rem]",
         compact && "h-full"

@@ -30,6 +30,7 @@ import { ReportListingButton } from "@/components/property/ReportListingButton";
 import { PeopleWatching } from "@/components/property/PeopleWatching";
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { getPropertyFromDb } from "@/lib/properties";
+import { FEATURES, featureCountLabel } from "@/lib/listing-features";
 import { getTrustScore } from "@/lib/trust";
 import { landlordReplyLabel } from "@/lib/reply-time";
 import { isJustAdded } from "@/lib/just-added";
@@ -53,6 +54,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const { id } = await params;
   const property = await getPropertyFromDb(id);
   if (!property) notFound();
+  // Components added in the Listing Studio (bedrooms/bathrooms already have their own tiles).
+  const extraFeatures = FEATURES.flatMap((def) => {
+    const count = property.features?.[def.key] ?? 0;
+    if (count <= 0 || def.key === "bedroom" || def.key === "bathroom") return [];
+    return [{ key: def.key, label: featureCountLabel(def.key, count), Icon: def.icon }];
+  });
   const landlordTrust = await getTrustScore(property.landlord.id);
   const replyLabel = await landlordReplyLabel(property.landlord.id);
   const session = await auth();
@@ -195,6 +202,20 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             }
           />
         </div>
+
+        {extraFeatures.length > 0 && (
+          <ul aria-label="Home features" className="flex flex-wrap gap-2">
+            {extraFeatures.map(({ key, label, Icon }) => (
+              <li
+                key={key}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-medium text-foreground"
+              >
+                <Icon className="size-3.5 text-brand" strokeWidth={1.7} />
+                {label}
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-white p-4">
           {property.landlord.avatar_url ? (

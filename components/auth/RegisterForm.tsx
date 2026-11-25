@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Lock } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function RegisterForm() {
   const [form, setForm] = useState({
     fullName: "",
     companyName: "",
+    registrationNumber: "",
     email: "",
     phoneNumber: "",
     password: "",
@@ -30,6 +32,13 @@ export function RegisterForm() {
       toast.error("Enter your firm or building society name");
       return;
     }
+    if (
+      (role === "agent" || role === "firm") &&
+      form.registrationNumber.trim().length < 3
+    ) {
+      toast.error(`Enter your ${role} registration number`);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/v1/auth/register", {
@@ -38,6 +47,10 @@ export function RegisterForm() {
         body: JSON.stringify({
           ...form,
           companyName: role === "firm" ? form.companyName.trim() : null,
+          registrationNumber:
+            role === "agent" || role === "firm"
+              ? form.registrationNumber.trim()
+              : null,
           role,
         }),
       });
@@ -121,6 +134,30 @@ export function RegisterForm() {
             placeholder="e.g. Accra Homes Ltd"
             className="h-11 rounded-xl"
           />
+        </div>
+      )}
+      {(role === "agent" || role === "firm") && (
+        <div className="space-y-2">
+          <Label htmlFor="registrationNumber">
+            {role === "firm" ? "Firm registration number" : "Agent registration number"}
+          </Label>
+          <Input
+            id="registrationNumber"
+            required
+            minLength={3}
+            maxLength={60}
+            value={form.registrationNumber}
+            onChange={(e) =>
+              setForm({ ...form, registrationNumber: e.target.value })
+            }
+            placeholder={role === "firm" ? "e.g. CS123456789" : "e.g. your agency or licence number"}
+            className="h-11 rounded-xl"
+          />
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+            <Lock className="mt-0.5 size-3 shrink-0" />
+            Kept private — only our team can see it. It is never shown on your
+            listings or profile.
+          </p>
         </div>
       )}
       <div className="space-y-2">
